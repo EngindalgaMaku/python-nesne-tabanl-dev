@@ -1,0 +1,286 @@
+{% extends 'base.html' %}
+
+{% block title %}Değerlendirme Yap - {{ sunum.baslik }}{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="display-5 fw-bold">
+            <i class="bi bi-star"></i> Değerlendirme Yap
+        </h1>
+        <p class="text-muted">
+            <strong>Sunum:</strong> {{ sunum.baslik }} | 
+            <strong>Ekip:</strong> {{ sunum.ekip.isim }}
+        </p>
+    </div>
+    <a href="{{ url_for('sunum_detay', sunum_id=sunum.id) }}" class="btn btn-outline-secondary">
+        <i class="bi bi-arrow-left"></i> Geri
+    </a>
+</div>
+
+<div class="alert alert-warning border-0 mb-4" role="alert" style="background: #fef3c7; border-left: 4px solid #f59e0b;">
+    <i class="bi bi-exclamation-triangle-fill"></i>
+    <strong>Not:</strong>
+    Bu sayfa <strong>genel kullanım</strong> içindir (admin girişi gerekmez).
+    Değerlendiren kişi, aşağıdan seçilir.
+    Aynı öğrenci aynı sunuma <strong>yalnızca 1 kez</strong> değerlendirme yapabilir.
+</div>
+
+<div class="card" style="border: none; box-shadow: 0 4px 15px rgba(0,0,0,0.1); border-radius: 12px;">
+    <div class="card-header" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border-radius: 12px 12px 0 0;">
+        <h5 class="mb-0">
+            <i class="bi bi-star-fill"></i> Değerlendirme Formu
+        </h5>
+    </div>
+    <div class="card-body" style="background: #fafafa; padding: 30px;">
+        <div class="alert alert-info border-0 mb-4" style="background: #eff6ff; border-left: 4px solid #3b82f6;">
+            <i class="bi bi-info-circle-fill"></i> 
+            <strong>Değerlendirme Nasıl Yapılır?</strong> 
+            Her kriter için 0-100 arası puan verin. Sistem otomatik olarak ağırlıklı ortalamayı hesaplar. 
+            <strong>Önemli:</strong> Ekipler kendi sunumlarına puan veremez!
+        </div>
+        
+        <form method="POST">
+            <div class="card mb-4" style="border: 1px solid #e5e7eb;">
+                <div class="card-header bg-light">
+                    <h6 class="mb-0 fw-bold">
+                        <i class="bi bi-person-badge"></i> Değerlendiren Bilgileri
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Değerlendiren Tipi <span class="text-danger">*</span></label>
+                            <select class="form-select" name="degerlendiren_tipi" id="degerlendiren_tipi" required>
+                                <option value="">Seçiniz...</option>
+                                <option value="ogrenci">Öğrenci</option>
+                                <option value="ogretmen">Öğretmen</option>
+                            </select>
+                        </div>
+                        
+                        <div class="col-md-6 mb-3" id="ogrenci-field" style="display: none;">
+                            <label class="form-label fw-bold">Değerlendiren Öğrenci <span class="text-danger">*</span></label>
+                            <select class="form-select" name="degerlendiren_ogrenci_id" id="degerlendiren_ogrenci">
+                                <option value="">Öğrenci Seçiniz...</option>
+                                {% for ogrenci in ogrenciler %}
+                                <option value="{{ ogrenci.id }}">{{ ogrenci.tam_ad }}</option>
+                                {% endfor %}
+                            </select>
+                            <small class="text-danger mt-2 d-block">
+                                <i class="bi bi-exclamation-triangle-fill"></i> Kendi ekibinize puan veremezsiniz!
+                            </small>
+                        </div>
+                        
+                        <div class="col-md-6 mb-3" id="ogretmen-field" style="display: none;">
+                            <label class="form-label fw-bold">Değerlendiren Öğretmen <span class="text-danger">*</span></label>
+                            <select class="form-select" name="degerlendiren_ogretmen_id" id="degerlendiren_ogretmen">
+                                <option value="">Öğretmen Seçiniz...</option>
+                                {% for ogretmen in ogretmenler %}
+                                <option value="{{ ogretmen.id }}">{{ ogretmen.tam_ad }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card mb-4" style="border: 1px solid #e5e7eb;">
+                <div class="card-header bg-light">
+                    <h6 class="mb-0 fw-bold">
+                        <i class="bi bi-clipboard-check"></i> Değerlendirme Kriterleri
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted small mb-4">
+                        Her kriter için 0-100 arası puan verin. Parantez içindeki yüzdeler kriterlerin ağırlıklarını gösterir.
+                    </p>
+            
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <div class="kriter-card">
+                                <label class="d-flex justify-content-between align-items-center mb-2">
+                                    <span class="fw-bold">Konu Hakimiyeti</span>
+                                    <span class="badge bg-primary">%15</span>
+                                </label>
+                                <input type="number" class="form-control kriter-input" 
+                                       name="konu_hakimiyeti" min="0" max="100" step="0.1" 
+                                       placeholder="0-100" required>
+                                <small class="text-muted">Sunum konusuna ne kadar hakim?</small>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <div class="kriter-card">
+                                <label class="d-flex justify-content-between align-items-center mb-2">
+                                    <span class="fw-bold">Anlatım</span>
+                                    <span class="badge bg-primary">%15</span>
+                                </label>
+                                <input type="number" class="form-control kriter-input" 
+                                       name="anlatim" min="0" max="100" step="0.1" 
+                                       placeholder="0-100" required>
+                                <small class="text-muted">Sunum anlatımı ne kadar etkili?</small>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <div class="kriter-card">
+                                <label class="d-flex justify-content-between align-items-center mb-2">
+                                    <span class="fw-bold">Giyim</span>
+                                    <span class="badge bg-primary">%5</span>
+                                </label>
+                                <input type="number" class="form-control kriter-input" 
+                                       name="giyim" min="0" max="100" step="0.1" 
+                                       placeholder="0-100" required>
+                                <small class="text-muted">Kıyafet uygunluğu nasıl?</small>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <div class="kriter-card">
+                                <label class="d-flex justify-content-between align-items-center mb-2">
+                                    <span class="fw-bold">Ekip Uyumu ve Görev Paylaşımı</span>
+                                    <span class="badge bg-primary">%10</span>
+                                </label>
+                                <input type="number" class="form-control kriter-input" 
+                                       name="ekip_uyumu" min="0" max="100" step="0.1" 
+                                       placeholder="0-100" required>
+                                <small class="text-muted">Ekip içi uyum ve iş bölümü nasıl?</small>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <div class="kriter-card">
+                                <label class="d-flex justify-content-between align-items-center mb-2">
+                                    <span class="fw-bold">Görsellik</span>
+                                    <span class="badge bg-primary">%35</span>
+                                </label>
+                                <input type="number" class="form-control kriter-input" 
+                                       name="gorsellik" min="0" max="100" step="0.1" 
+                                       placeholder="0-100" required>
+                                <small class="text-muted">Slayt tasarımı ve görsel kalite nasıl?</small>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <div class="kriter-card">
+                                <label class="d-flex justify-content-between align-items-center mb-2">
+                                    <span class="fw-bold">Genel Görüş</span>
+                                    <span class="badge bg-primary">%20</span>
+                                </label>
+                                <input type="number" class="form-control kriter-input" 
+                                       name="genel_gorus" min="0" max="100" step="0.1" 
+                                       placeholder="0-100" required>
+                                <small class="text-muted">Genel olarak sunum nasıldı?</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card mb-4" style="border: 1px solid #e5e7eb;">
+                <div class="card-header bg-light">
+                    <h6 class="mb-0 fw-bold">
+                        <i class="bi bi-chat-left-text"></i> Yorum (İsteğe Bağlı)
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <textarea class="form-control" name="yorum" rows="4" 
+                              placeholder="Değerlendirme hakkında detaylı yorumlarınızı, önerilerinizi veya geri bildirimlerinizi yazabilirsiniz..."></textarea>
+                    <small class="text-muted">Yapıcı geri bildirimler ekip için çok değerlidir</small>
+                </div>
+            </div>
+            
+            <div class="d-flex gap-2">
+                <button type="submit" class="btn btn-primary btn-lg flex-fill" 
+                        style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border: none;">
+                    <i class="bi bi-check-circle-fill"></i> Değerlendirmeyi Kaydet
+                </button>
+                <a href="{{ url_for('sunum_detay', sunum_id=sunum.id) }}" class="btn btn-outline-secondary btn-lg">
+                    <i class="bi bi-x-circle"></i> İptal
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .kriter-card {
+        background: #f9fafb;
+        border: 1px solid #e5e7eb;
+        border-radius: 8px;
+        padding: 15px;
+        margin-bottom: 15px;
+    }
+    
+    .kriter-card label {
+        font-weight: 500;
+        color: #374151;
+        margin-bottom: 8px;
+        font-size: 0.9rem;
+    }
+    
+    .kriter-input {
+        border: 1px solid #d1d5db;
+        border-radius: 8px;
+        padding: 10px;
+        font-size: 0.95rem;
+        transition: all 0.2s;
+    }
+    
+    .kriter-input:focus {
+        border-color: #667eea;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        outline: none;
+    }
+    
+    .kriter-badge {
+        background: #667eea;
+        color: white;
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-size: 0.75rem;
+        font-weight: 500;
+    }
+    
+    .select-enhanced {
+        border: 1px solid #d1d5db;
+        border-radius: 8px;
+        padding: 10px;
+        font-size: 0.95rem;
+    }
+    
+    .select-enhanced:focus {
+        border-color: #667eea;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        outline: none;
+    }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.getElementById('degerlendiren_tipi').addEventListener('change', function() {
+        const tip = this.value;
+        const ogrenciField = document.getElementById('ogrenci-field');
+        const ogretmenField = document.getElementById('ogretmen-field');
+        
+        if (tip === 'ogrenci') {
+            ogrenciField.style.display = 'block';
+            ogretmenField.style.display = 'none';
+        } else if (tip === 'ogretmen') {
+            ogrenciField.style.display = 'none';
+            ogretmenField.style.display = 'block';
+        } else {
+            ogrenciField.style.display = 'none';
+            ogretmenField.style.display = 'none';
+        }
+    });
+    
+    // İlk yüklemede kontrol et
+    document.getElementById('degerlendiren_tipi').dispatchEvent(new Event('change'));
+</script>
+{% endblock %}
+
+

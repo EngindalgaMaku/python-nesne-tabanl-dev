@@ -1,0 +1,131 @@
+{% extends 'base.html' %}
+
+{% block title %}Giriş - Sunum Değerlendirme Sistemi{% endblock %}
+
+{% block extra_css %}
+<style>
+    .login-card {
+        border: none;
+        border-radius: 25px;
+        box-shadow: 0 15px 50px rgba(0,0,0,0.2);
+        overflow: hidden;
+    }
+    
+    .login-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 40px;
+        text-align: center;
+    }
+    
+    .login-header h2 {
+        font-size: 2rem;
+        font-weight: 700;
+        margin: 0;
+    }
+    
+    .login-header i {
+        font-size: 3rem;
+        margin-bottom: 15px;
+        opacity: 0.9;
+    }
+    
+    .login-body {
+        padding: 40px;
+        background: white;
+    }
+    
+    .form-control-login {
+        border: 2px solid #e5e7eb;
+        border-radius: 12px;
+        padding: 15px 20px;
+        font-size: 1rem;
+        transition: all 0.3s;
+    }
+    
+    .form-control-login:focus {
+        border-color: #667eea;
+        box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+        transform: translateY(-2px);
+    }
+    
+    .btn-login {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border: none;
+        border-radius: 12px;
+        padding: 15px;
+        font-weight: 600;
+        font-size: 1.1rem;
+        transition: all 0.3s;
+        box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+    }
+    
+    .btn-login:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 30px rgba(102, 126, 234, 0.5);
+    }
+    
+    .info-box {
+        background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+        border-left: 4px solid #3b82f6;
+        border-radius: 10px;
+        padding: 20px;
+        margin-top: 25px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-5">
+        <div class="login-card">
+            <div class="login-header">
+                <i class="bi bi-shield-lock-fill"></i>
+                <h2>Giriş Yap</h2>
+                <p class="mb-0 opacity-90">Sunum Değerlendirme Sistemi</p>
+            </div>
+            <div class="login-body">
+                <form method="POST" action="{{ url_for('login') }}">
+                    <div class="mb-4">
+                        <label class="form-label fw-bold mb-2">
+                            <i class="bi bi-person"></i> Kullanıcı Adı
+                        </label>
+                        <input type="text" class="form-control form-control-login" 
+                               name="username" placeholder="Kullanıcı adınızı girin" required autofocus>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label class="form-label fw-bold mb-2">
+                            <i class="bi bi-lock"></i> Şifre
+                        </label>
+                        <input type="password" class="form-control form-control-login" 
+                               name="password" placeholder="Şifrenizi girin" required>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-login btn-primary w-100 text-white">
+                        <i class="bi bi-box-arrow-in-right"></i> Giriş Yap
+                    </button>
+                </form>
+                
+                <div class="info-box">
+                    <h6 class="fw-bold mb-3">
+                        <i class="bi bi-info-circle-fill"></i> Varsayılan Giriş Bilgileri
+                    </h6>
+                    <div class="row">
+                        <div class="col-6">
+                            <strong>Kullanıcı Adı:</strong><br>
+                            <code>admin</code>
+                        </div>
+                        <div class="col-6">
+                            <strong>Şifre:</strong><br>
+                            <code>admin123</code>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+

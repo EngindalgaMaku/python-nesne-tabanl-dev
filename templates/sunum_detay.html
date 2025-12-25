@@ -1,0 +1,113 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ sunum.baslik }} - Detaylar{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="display-5 fw-bold">{{ sunum.baslik }}</h1>
+        <p class="text-muted">
+            <i class="bi bi-people"></i> {{ sunum.ekip.isim }} | 
+            <i class="bi bi-calendar"></i> {{ sunum.sunum_tarihi.strftime('%d.%m.%Y %H:%M') }}
+        </p>
+    </div>
+    <a href="{{ url_for('index') }}" class="btn btn-outline-secondary">
+        <i class="bi bi-arrow-left"></i> Geri
+    </a>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-4 mb-3">
+        <div class="stat-card">
+            <i class="bi bi-trophy" style="font-size: 2rem;"></i>
+            <h3>{% if final_not_bilgisi.final_notu %}{{ final_not_bilgisi.final_notu }}{% else %}--{% endif %}</h3>
+            <p class="mb-0">Final Notu</p>
+        </div>
+    </div>
+    <div class="col-md-4 mb-3">
+        <div class="stat-card" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%);">
+            <i class="bi bi-person-check" style="font-size: 2rem;"></i>
+            <h3>{% if final_not_bilgisi.ogretmen_notu %}{{ final_not_bilgisi.ogretmen_notu }}{% else %}--{% endif %}</h3>
+            <p class="mb-0">Öğretmen Notu</p>
+        </div>
+    </div>
+    <div class="col-md-4 mb-3">
+        <div class="stat-card" style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);">
+            <i class="bi bi-people" style="font-size: 2rem;"></i>
+            <h3>{% if final_not_bilgisi.ogrenci_ortalama %}{{ final_not_bilgisi.ogrenci_ortalama }}{% else %}--{% endif %}</h3>
+            <p class="mb-0">Öğrenci Ortalaması</p>
+            <small>({{ final_not_bilgisi.degerlendirme_sayisi }} değerlendirme)</small>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+        <h5 class="mb-0"><i class="bi bi-list-check"></i> Değerlendirmeler</h5>
+        <a href="{{ url_for('degerlendirme_yap', sunum_id=sunum.id) }}" class="btn btn-light btn-sm">
+            <i class="bi bi-plus-circle"></i> Yeni Değerlendirme
+        </a>
+    </div>
+    <div class="card-body">
+        {% if degerlendirmeler_with_avg %}
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>Değerlendiren</th>
+                        <th>Tip</th>
+                        <th>Konu Hakimiyeti</th>
+                        <th>Anlatım</th>
+                        <th>Giyim</th>
+                        <th>Ekip Uyumu</th>
+                        <th>Görsellik</th>
+                        <th>Genel Görüş</th>
+                        <th>Ortalama</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in degerlendirmeler_with_avg %}
+                    {% set degerlendirme = item.degerlendirme %}
+                    <tr>
+                        <td>{{ degerlendirme.degerlendiren_adi() }}</td>
+                        <td>
+                            {% if degerlendirme.degerlendiren_tipi == 'ogretmen' %}
+                                <span class="badge bg-success">Öğretmen</span>
+                            {% else %}
+                                <span class="badge bg-info">Öğrenci</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ degerlendirme.konu_hakimiyeti }}</td>
+                        <td>{{ degerlendirme.anlatim }}</td>
+                        <td>{{ degerlendirme.giyim }}</td>
+                        <td>{{ degerlendirme.ekip_uyumu }}</td>
+                        <td>{{ degerlendirme.gorsellik }}</td>
+                        <td>{{ degerlendirme.genel_gorus }}</td>
+                        <td>
+                            <span class="badge bg-primary">{{ item.ortalama }}</span>
+                        </td>
+                    </tr>
+                    {% if degerlendirme.yorum %}
+                    <tr>
+                        <td colspan="9" class="text-muted small">
+                            <i class="bi bi-chat-left-text"></i> <strong>Yorum:</strong> {{ degerlendirme.yorum }}
+                        </td>
+                    </tr>
+                    {% endif %}
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="text-center py-4">
+            <i class="bi bi-inbox" style="font-size: 3rem; color: #ccc;"></i>
+            <p class="text-muted mt-3">Henüz değerlendirme yapılmamış.</p>
+            <a href="{{ url_for('degerlendirme_yap', sunum_id=sunum.id) }}" class="btn btn-primary">
+                <i class="bi bi-star"></i> İlk Değerlendirmeyi Yap
+            </a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+

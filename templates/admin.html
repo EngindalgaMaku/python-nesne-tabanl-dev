@@ -1,0 +1,659 @@
+{% extends 'base.html' %}
+
+{% block title %}Admin Paneli{% endblock %}
+
+{% block extra_css %}
+<style>
+    .admin-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 30px;
+        border-radius: 12px;
+        margin-bottom: 30px;
+        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.2);
+    }
+    
+    .nav-tabs {
+        border-bottom: 2px solid #e5e7eb;
+    }
+    
+    .nav-tabs .nav-link {
+        border: none;
+        border-bottom: 3px solid transparent;
+        color: #6b7280;
+        font-weight: 600;
+        padding: 15px 25px;
+        transition: all 0.3s;
+    }
+    
+    .nav-tabs .nav-link:hover {
+        border-bottom-color: #d1d5db;
+        color: #374151;
+    }
+    
+    .nav-tabs .nav-link.active {
+        color: #667eea;
+        border-bottom-color: #667eea;
+        background: transparent;
+    }
+    
+    .tab-content {
+        padding: 30px 0;
+    }
+    
+    .stat-card {
+        background: white;
+        border: 1px solid #e5e7eb;
+        border-radius: 12px;
+        padding: 25px;
+        text-align: center;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+        transition: all 0.2s;
+        height: 100%;
+    }
+    
+    .stat-card:hover {
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    
+    .stat-card h2 {
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin: 10px 0;
+        color: #1f2937;
+    }
+    
+    .stat-card .icon {
+        font-size: 2rem;
+        margin-bottom: 8px;
+        opacity: 0.8;
+    }
+    
+    .stat-card p {
+        font-size: 0.95rem;
+        margin: 0;
+        color: #6b7280;
+        font-weight: 500;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="admin-header">
+    <h1 class="h2 fw-bold mb-2">
+        <i class="bi bi-shield-lock-fill"></i> Admin Paneli
+    </h1>
+    <p class="mb-0 opacity-90">Sistem yönetimi ve veri işlemleri</p>
+</div>
+
+<div class="alert alert-warning border-0" role="alert" style="background: #fef3c7; border-left: 4px solid #f59e0b;">
+    <i class="bi bi-exclamation-triangle-fill"></i>
+    <strong>Admin Alanı:</strong> Bu sayfadaki ekleme/silme/düzenleme işlemleri yalnızca admin kullanıcılar içindir.
+    <strong>Silme</strong> işlemleri geri alınamaz.
+</div>
+
+<!-- İstatistikler -->
+<div class="row mb-4">
+    <div class="col-md-3 mb-3">
+        <div class="stat-card">
+            <i class="bi bi-people-fill icon text-primary"></i>
+            <h2>{{ ekip_sayisi }}</h2>
+            <p>Ekip</p>
+        </div>
+    </div>
+    <div class="col-md-3 mb-3">
+        <div class="stat-card">
+            <i class="bi bi-person-fill icon text-success"></i>
+            <h2>{{ ogrenci_sayisi }}</h2>
+            <p>Öğrenci</p>
+        </div>
+    </div>
+    <div class="col-md-3 mb-3">
+        <div class="stat-card">
+            <i class="bi bi-person-check-fill icon text-info"></i>
+            <h2>{{ ogretmen_sayisi }}</h2>
+            <p>Öğretmen</p>
+        </div>
+    </div>
+    <div class="col-md-3 mb-3">
+        <div class="stat-card">
+            <i class="bi bi-presentation-chart-fill icon text-warning"></i>
+            <h2>{{ sunum_sayisi }}</h2>
+            <p>Sunum</p>
+        </div>
+    </div>
+</div>
+
+<!-- Tab Sistemi -->
+<ul class="nav nav-tabs" id="adminTabs" role="tablist">
+    <li class="nav-item" role="presentation">
+        <button class="nav-link active" id="ekip-tab" data-bs-toggle="tab" data-bs-target="#ekip" type="button" role="tab">
+            <i class="bi bi-people"></i> Ekipler
+        </button>
+    </li>
+    <li class="nav-item" role="presentation">
+        <button class="nav-link" id="ogrenci-tab" data-bs-toggle="tab" data-bs-target="#ogrenci" type="button" role="tab">
+            <i class="bi bi-person"></i> Öğrenciler
+        </button>
+    </li>
+    <li class="nav-item" role="presentation">
+        <button class="nav-link" id="ogretmen-tab" data-bs-toggle="tab" data-bs-target="#ogretmen" type="button" role="tab">
+            <i class="bi bi-person-check"></i> Öğretmenler
+        </button>
+    </li>
+    <li class="nav-item" role="presentation">
+        <button class="nav-link" id="sunum-tab" data-bs-toggle="tab" data-bs-target="#sunum" type="button" role="tab">
+            <i class="bi bi-presentation-chart"></i> Sunumlar
+        </button>
+    </li>
+</ul>
+
+<div class="tab-content" id="adminTabContent">
+    <!-- Ekip Tab -->
+    <div class="tab-pane fade show active" id="ekip" role="tabpanel">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h4 class="fw-bold mb-0">
+                <i class="bi bi-people-fill text-primary"></i> Ekip Yönetimi
+            </h4>
+            <button class="btn btn-primary" onclick="toggleEkipForm()">
+                <i class="bi bi-plus-circle"></i> Yeni Ekip Ekle
+            </button>
+        </div>
+        
+        <!-- Ekleme Formu -->
+        <div class="card mb-4" id="ekipForm" style="display: none;">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0"><i class="bi bi-plus-circle"></i> Yeni Ekip Ekle</h5>
+            </div>
+            <div class="card-body">
+                <form method="POST" action="{{ url_for('admin_ekip') }}">
+                    <input type="hidden" name="ekle" value="1">
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Ekip İsmi <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" name="isim" required placeholder="Örn: Ekip 1">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Açıklama</label>
+                        <textarea class="form-control" name="aciklama" rows="3" placeholder="Ekip hakkında açıklama"></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-check-circle"></i> Kaydet
+                    </button>
+                    <button type="button" class="btn btn-secondary" onclick="toggleEkipForm()">İptal</button>
+                </form>
+            </div>
+        </div>
+        
+        <!-- Liste -->
+        <div class="card">
+            <div class="card-header bg-light">
+                <h5 class="mb-0"><i class="bi bi-list-ul"></i> Ekip Listesi ({{ ekipler|length }})</h5>
+            </div>
+            <div class="card-body p-0">
+                {% if ekipler %}
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>ID</th>
+                                <th>Ekip İsmi</th>
+                                <th>Üye Sayısı</th>
+                                <th>Açıklama</th>
+                                <th>İşlemler</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for ekip in ekipler %}
+                            <tr>
+                                <td>{{ ekip.id }}</td>
+                                <td><strong>{{ ekip.isim }}</strong></td>
+                                <td><span class="badge bg-primary">{{ ekip.ogrenciler|length }}</span></td>
+                                <td><small class="text-muted">{{ ekip.aciklama[:50] if ekip.aciklama else '-' }}{% if ekip.aciklama and ekip.aciklama|length > 50 %}...{% endif %}</small></td>
+                                <td>
+                                    <button class="btn btn-sm btn-outline-primary" type="button" onclick="editEkipFromBtn(this)" data-id="{{ ekip.id }}" data-isim='{{ ekip.isim|tojson }}' data-aciklama='{{ (ekip.aciklama if ekip.aciklama else '')|tojson }}'>
+                                        <i class="bi bi-pencil"></i> Düzenle
+                                    </button>
+                                    <form method="POST" action="{{ url_for('admin_ekip') }}" style="display: inline;" onsubmit="return confirm('Bu ekibi silmek istediğinize emin misiniz?');">
+                                        <input type="hidden" name="sil" value="1">
+                                        <input type="hidden" name="ekip_id" value="{{ ekip.id }}">
+                                        <button type="submit" class="btn btn-sm btn-outline-danger">
+                                            <i class="bi bi-trash"></i> Sil
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="text-center py-5">
+                    <i class="bi bi-inbox" style="font-size: 3rem; color: #ccc;"></i>
+                    <p class="text-muted mt-3">Henüz ekip eklenmemiş.</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <!-- Öğrenci Tab -->
+    <div class="tab-pane fade" id="ogrenci" role="tabpanel">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h4 class="fw-bold mb-0">
+                <i class="bi bi-person-fill text-success"></i> Öğrenci Yönetimi
+            </h4>
+            <button class="btn btn-success" onclick="toggleOgrenciForm()">
+                <i class="bi bi-plus-circle"></i> Yeni Öğrenci Ekle
+            </button>
+        </div>
+        
+        <!-- Ekleme Formu -->
+        <div class="card mb-4" id="ogrenciForm" style="display: none;">
+            <div class="card-header bg-success text-white">
+                <h5 class="mb-0"><i class="bi bi-plus-circle"></i> Yeni Öğrenci Ekle</h5>
+            </div>
+            <div class="card-body">
+                <form method="POST" action="{{ url_for('admin_ogrenci') }}">
+                    <input type="hidden" name="ekle" value="1">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Ad <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" name="ad" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Soyad <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" name="soyad" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Numara <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" name="numara" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Ekip</label>
+                            <select class="form-select" name="ekip_id">
+                                <option value="">Ekip Seçiniz</option>
+                                {% for ekip in ekipler %}
+                                <option value="{{ ekip.id }}">{{ ekip.isim }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-success">
+                        <i class="bi bi-check-circle"></i> Kaydet
+                    </button>
+                    <button type="button" class="btn btn-secondary" onclick="toggleOgrenciForm()">İptal</button>
+                </form>
+            </div>
+        </div>
+        
+        <!-- Liste -->
+        <div class="card">
+            <div class="card-header bg-light">
+                <h5 class="mb-0"><i class="bi bi-list-ul"></i> Öğrenci Listesi ({{ ogrenciler|length }})</h5>
+            </div>
+            <div class="card-body p-0">
+                {% if ogrenciler %}
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>ID</th>
+                                <th>Ad Soyad</th>
+                                <th>Numara</th>
+                                <th>Ekip</th>
+                                <th>İşlemler</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for ogrenci in ogrenciler %}
+                            <tr>
+                                <td>{{ ogrenci.id }}</td>
+                                <td><strong>{{ ogrenci.tam_ad }}</strong></td>
+                                <td>{{ ogrenci.numara }}</td>
+                                <td>
+                                    {% if ogrenci.ekip %}
+                                        <span class="badge bg-primary">{{ ogrenci.ekip.isim }}</span>
+                                    {% else %}
+                                        <span class="text-muted">-</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <button class="btn btn-sm btn-outline-primary" type="button" onclick="editOgrenciFromBtn(this)" data-id="{{ ogrenci.id }}" data-ad='{{ ogrenci.ad|tojson }}' data-soyad='{{ ogrenci.soyad|tojson }}' data-numara='{{ ogrenci.numara|tojson }}' data-ekipid='{{ (ogrenci.ekip_id if ogrenci.ekip_id else none)|tojson }}'>
+                                        <i class="bi bi-pencil"></i> Düzenle
+                                    </button>
+                                    <form method="POST" action="{{ url_for('admin_ogrenci') }}" style="display: inline;" onsubmit="return confirm('Bu öğrenciyi silmek istediğinize emin misiniz?');">
+                                        <input type="hidden" name="sil" value="1">
+                                        <input type="hidden" name="ogrenci_id" value="{{ ogrenci.id }}">
+                                        <button type="submit" class="btn btn-sm btn-outline-danger">
+                                            <i class="bi bi-trash"></i> Sil
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="text-center py-5">
+                    <i class="bi bi-inbox" style="font-size: 3rem; color: #ccc;"></i>
+                    <p class="text-muted mt-3">Henüz öğrenci eklenmemiş.</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <!-- Öğretmen Tab -->
+    <div class="tab-pane fade" id="ogretmen" role="tabpanel">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h4 class="fw-bold mb-0">
+                <i class="bi bi-person-check-fill text-info"></i> Öğretmen Yönetimi
+            </h4>
+            <button class="btn btn-info text-white" onclick="toggleOgretmenForm()">
+                <i class="bi bi-plus-circle"></i> Yeni Öğretmen Ekle
+            </button>
+        </div>
+        
+        <!-- Ekleme Formu -->
+        <div class="card mb-4" id="ogretmenForm" style="display: none;">
+            <div class="card-header bg-info text-white">
+                <h5 class="mb-0"><i class="bi bi-plus-circle"></i> Yeni Öğretmen Ekle</h5>
+            </div>
+            <div class="card-body">
+                <form method="POST" action="{{ url_for('admin_ogretmen') }}">
+                    <input type="hidden" name="ekle" value="1">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Ad <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" name="ad" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Soyad <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" name="soyad" required>
+                        </div>
+                        <div class="col-md-12 mb-3">
+                            <label class="form-label fw-bold">Unvan</label>
+                            <input type="text" class="form-control" name="unvan" placeholder="Örn: Prof. Dr., Doç. Dr.">
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-info text-white">
+                        <i class="bi bi-check-circle"></i> Kaydet
+                    </button>
+                    <button type="button" class="btn btn-secondary" onclick="toggleOgretmenForm()">İptal</button>
+                </form>
+            </div>
+        </div>
+        
+        <!-- Liste -->
+        <div class="card">
+            <div class="card-header bg-light">
+                <h5 class="mb-0"><i class="bi bi-list-ul"></i> Öğretmen Listesi ({{ ogretmenler|length }})</h5>
+            </div>
+            <div class="card-body p-0">
+                {% if ogretmenler %}
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>ID</th>
+                                <th>Ad Soyad</th>
+                                <th>Unvan</th>
+                                <th>İşlemler</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for ogretmen in ogretmenler %}
+                            <tr>
+                                <td>{{ ogretmen.id }}</td>
+                                <td><strong>{{ ogretmen.tam_ad }}</strong></td>
+                                <td>{{ ogretmen.unvan if ogretmen.unvan else '-' }}</td>
+                                <td>
+                                    <button class="btn btn-sm btn-outline-primary" type="button" onclick="editOgretmenFromBtn(this)" data-id="{{ ogretmen.id }}" data-ad='{{ ogretmen.ad|tojson }}' data-soyad='{{ ogretmen.soyad|tojson }}' data-unvan='{{ (ogretmen.unvan if ogretmen.unvan else '')|tojson }}'>
+                                        <i class="bi bi-pencil"></i> Düzenle
+                                    </button>
+                                    <form method="POST" action="{{ url_for('admin_ogretmen') }}" style="display: inline;" onsubmit="return confirm('Bu öğretmeni silmek istediğinize emin misiniz?');">
+                                        <input type="hidden" name="sil" value="1">
+                                        <input type="hidden" name="ogretmen_id" value="{{ ogretmen.id }}">
+                                        <button type="submit" class="btn btn-sm btn-outline-danger">
+                                            <i class="bi bi-trash"></i> Sil
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="text-center py-5">
+                    <i class="bi bi-inbox" style="font-size: 3rem; color: #ccc;"></i>
+                    <p class="text-muted mt-3">Henüz öğretmen eklenmemiş.</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <!-- Sunum Tab -->
+    <div class="tab-pane fade" id="sunum" role="tabpanel">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h4 class="fw-bold mb-0">
+                <i class="bi bi-presentation-chart-fill text-warning"></i> Sunum Yönetimi
+            </h4>
+            <button class="btn btn-warning text-white" onclick="toggleSunumForm()">
+                <i class="bi bi-plus-circle"></i> Yeni Sunum Ekle
+            </button>
+        </div>
+        
+        <!-- Ekleme Formu -->
+        <div class="card mb-4" id="sunumForm" style="display: none;">
+            <div class="card-header bg-warning text-white">
+                <h5 class="mb-0"><i class="bi bi-plus-circle"></i> Yeni Sunum Ekle</h5>
+            </div>
+            <div class="card-body">
+                <form method="POST" action="{{ url_for('admin_sunum') }}">
+                    <input type="hidden" name="ekle" value="1">
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Başlık <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" name="baslik" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Açıklama</label>
+                        <textarea class="form-control" name="aciklama" rows="3"></textarea>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Sunum Tarihi <span class="text-danger">*</span></label>
+                            <input type="datetime-local" class="form-control" name="sunum_tarihi" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Ekip <span class="text-danger">*</span></label>
+                            <select class="form-select" name="ekip_id" required>
+                                <option value="">Ekip Seçiniz</option>
+                                {% for ekip in ekipler %}
+                                <option value="{{ ekip.id }}">{{ ekip.isim }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-warning text-white">
+                        <i class="bi bi-check-circle"></i> Kaydet
+                    </button>
+                    <button type="button" class="btn btn-secondary" onclick="toggleSunumForm()">İptal</button>
+                </form>
+            </div>
+        </div>
+        
+        <!-- Liste -->
+        <div class="card">
+            <div class="card-header bg-light">
+                <h5 class="mb-0"><i class="bi bi-list-ul"></i> Sunum Listesi ({{ sunumlar|length }})</h5>
+            </div>
+            <div class="card-body p-0">
+                {% if sunumlar %}
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>ID</th>
+                                <th>Başlık</th>
+                                <th>Ekip</th>
+                                <th>Sunum Tarihi</th>
+                                <th>İşlemler</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for sunum in sunumlar %}
+                            <tr>
+                                <td>{{ sunum.id }}</td>
+                                <td><strong>{{ sunum.baslik }}</strong></td>
+                                <td><span class="badge bg-primary">{{ sunum.ekip.isim }}</span></td>
+                                <td>{{ sunum.sunum_tarihi.strftime('%d.%m.%Y %H:%M') }}</td>
+                                <td>
+                                    <a href="{{ url_for('sunum_detay', sunum_id=sunum.id) }}" class="btn btn-sm btn-outline-info">
+                                        <i class="bi bi-eye"></i> Görüntüle
+                                    </a>
+                                    <button class="btn btn-sm btn-outline-primary" type="button" onclick="editSunumFromBtn(this)" data-id="{{ sunum.id }}" data-baslik='{{ sunum.baslik|tojson }}' data-aciklama='{{ (sunum.aciklama if sunum.aciklama else '')|tojson }}' data-tarih='{{ sunum.sunum_tarihi.strftime('%Y-%m-%dT%H:%M')|tojson }}' data-ekipid='{{ sunum.ekip_id|tojson }}'>
+                                        <i class="bi bi-pencil"></i> Düzenle
+                                    </button>
+                                    <form method="POST" action="{{ url_for('admin_sunum') }}" style="display: inline;" onsubmit="return confirm('Bu sunumu silmek istediğinize emin misiniz?');">
+                                        <input type="hidden" name="sil" value="1">
+                                        <input type="hidden" name="sunum_id" value="{{ sunum.id }}">
+                                        <button type="submit" class="btn btn-sm btn-outline-danger">
+                                            <i class="bi bi-trash"></i> Sil
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="text-center py-5">
+                    <i class="bi bi-inbox" style="font-size: 3rem; color: #ccc;"></i>
+                    <p class="text-muted mt-3">Henüz sunum eklenmemiş.</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Düzenleme Modalleri -->
+{% include 'admin_modals.html' %}
+
+<script>
+// URL hash'ine göre tab aç
+window.addEventListener('DOMContentLoaded', function() {
+    const hash = window.location.hash;
+    if (hash) {
+        const tab = document.querySelector(`button[data-bs-target="${hash}"]`);
+        if (tab) {
+            const tabInstance = new bootstrap.Tab(tab);
+            tabInstance.show();
+        }
+    }
+});
+
+function parseJsonAttr(value) {
+    try {
+        return JSON.parse(value);
+    } catch (e) {
+        return value;
+    }
+}
+
+function editEkipFromBtn(btn) {
+    editEkip(
+        parseInt(btn.dataset.id, 10),
+        parseJsonAttr(btn.dataset.isim),
+        parseJsonAttr(btn.dataset.aciklama)
+    );
+}
+
+function editOgrenciFromBtn(btn) {
+    const ekipId = parseJsonAttr(btn.dataset.ekipid);
+    editOgrenci(
+        parseInt(btn.dataset.id, 10),
+        parseJsonAttr(btn.dataset.ad),
+        parseJsonAttr(btn.dataset.soyad),
+        parseJsonAttr(btn.dataset.numara),
+        ekipId
+    );
+}
+
+function editOgretmenFromBtn(btn) {
+    editOgretmen(
+        parseInt(btn.dataset.id, 10),
+        parseJsonAttr(btn.dataset.ad),
+        parseJsonAttr(btn.dataset.soyad),
+        parseJsonAttr(btn.dataset.unvan)
+    );
+}
+
+function editSunumFromBtn(btn) {
+    editSunum(
+        parseInt(btn.dataset.id, 10),
+        parseJsonAttr(btn.dataset.baslik),
+        parseJsonAttr(btn.dataset.aciklama),
+        parseJsonAttr(btn.dataset.tarih),
+        parseJsonAttr(btn.dataset.ekipid)
+    );
+}
+
+function toggleEkipForm() {
+    document.getElementById('ekipForm').style.display = 
+        document.getElementById('ekipForm').style.display === 'none' ? 'block' : 'none';
+}
+
+function toggleOgrenciForm() {
+    document.getElementById('ogrenciForm').style.display = 
+        document.getElementById('ogrenciForm').style.display === 'none' ? 'block' : 'none';
+}
+
+function toggleOgretmenForm() {
+    document.getElementById('ogretmenForm').style.display = 
+        document.getElementById('ogretmenForm').style.display === 'none' ? 'block' : 'none';
+}
+
+function toggleSunumForm() {
+    document.getElementById('sunumForm').style.display = 
+        document.getElementById('sunumForm').style.display === 'none' ? 'block' : 'none';
+}
+
+function editEkip(id, isim, aciklama) {
+    document.getElementById('edit_ekip_id').value = id;
+    document.getElementById('edit_ekip_isim').value = isim;
+    document.getElementById('edit_ekip_aciklama').value = aciklama || '';
+    new bootstrap.Modal(document.getElementById('editEkipModal')).show();
+}
+
+function editOgrenci(id, ad, soyad, numara, ekipId) {
+    document.getElementById('edit_ogrenci_id').value = id;
+    document.getElementById('edit_ogrenci_ad').value = ad;
+    document.getElementById('edit_ogrenci_soyad').value = soyad;
+    document.getElementById('edit_ogrenci_numara').value = numara;
+    document.getElementById('edit_ogrenci_ekip').value = ekipId || '';
+    new bootstrap.Modal(document.getElementById('editOgrenciModal')).show();
+}
+
+function editOgretmen(id, ad, soyad, unvan) {
+    document.getElementById('edit_ogretmen_id').value = id;
+    document.getElementById('edit_ogretmen_ad').value = ad;
+    document.getElementById('edit_ogretmen_soyad').value = soyad;
+    document.getElementById('edit_ogretmen_unvan').value = unvan || '';
+    new bootstrap.Modal(document.getElementById('editOgretmenModal')).show();
+}
+
+function editSunum(id, baslik, aciklama, tarih, ekipId) {
+    document.getElementById('edit_sunum_id').value = id;
+    document.getElementById('edit_sunum_baslik').value = baslik;
+    document.getElementById('edit_sunum_aciklama').value = aciklama || '';
+    document.getElementById('edit_sunum_tarihi').value = tarih;
+    document.getElementById('edit_sunum_ekip').value = ekipId;
+    new bootstrap.Modal(document.getElementById('editSunumModal')).show();
+}
+</script>
+{% endblock %}

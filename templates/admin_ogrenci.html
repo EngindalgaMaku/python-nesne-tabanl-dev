@@ -1,0 +1,209 @@
+{% extends 'base.html' %}
+
+{% block title %}Öğrenci Yönetimi{% endblock %}
+
+{% block extra_css %}
+<style>
+    .list-card {
+        border: 1px solid #e5e7eb;
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+        margin-bottom: 20px;
+    }
+    
+    .list-header {
+        background: #f9fafb;
+        padding: 15px 20px;
+        border-bottom: 1px solid #e5e7eb;
+        border-radius: 12px 12px 0 0;
+    }
+    
+    .form-card {
+        border: 1px solid #e5e7eb;
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+        margin-bottom: 20px;
+        display: none;
+    }
+    
+    .form-card.show {
+        display: block;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h3 class="fw-bold mb-0">
+        <i class="bi bi-person-fill text-success"></i> Öğrenci Yönetimi
+    </h3>
+    <button class="btn btn-success" onclick="toggleForm()">
+        <i class="bi bi-plus-circle"></i> Yeni Öğrenci Ekle
+    </button>
+</div>
+
+<!-- Ekleme Formu -->
+<div class="form-card" id="ogrenciForm">
+    <div class="list-header">
+        <h5 class="mb-0 fw-bold">
+            <i class="bi bi-plus-circle"></i> Yeni Öğrenci Ekle
+        </h5>
+        <button class="btn btn-sm btn-outline-secondary float-end" onclick="toggleForm()">
+            <i class="bi bi-x"></i> Kapat
+        </button>
+    </div>
+    <div class="card-body p-4">
+        <form method="POST" action="{{ url_for('admin_ogrenci') }}">
+            <input type="hidden" name="ekle" value="1">
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label class="form-label fw-bold">Ad <span class="text-danger">*</span></label>
+                    <input type="text" class="form-control" name="ad" required>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label class="form-label fw-bold">Soyad <span class="text-danger">*</span></label>
+                    <input type="text" class="form-control" name="soyad" required>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label class="form-label fw-bold">Numara <span class="text-danger">*</span></label>
+                    <input type="text" class="form-control" name="numara" required>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label class="form-label fw-bold">Ekip</label>
+                    <select class="form-select" name="ekip_id">
+                        <option value="">Ekip Seçiniz</option>
+                        {% for ekip in ekipler %}
+                        <option value="{{ ekip.id }}">{{ ekip.isim }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+            <button type="submit" class="btn btn-success">
+                <i class="bi bi-check-circle"></i> Kaydet
+            </button>
+        </form>
+    </div>
+</div>
+
+<!-- Liste -->
+<div class="list-card">
+    <div class="list-header">
+        <h5 class="mb-0 fw-bold">
+            <i class="bi bi-list-ul"></i> Öğrenci Listesi ({{ ogrenciler|length }})
+        </h5>
+    </div>
+    <div class="card-body p-0">
+        {% if ogrenciler %}
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>ID</th>
+                        <th>Ad Soyad</th>
+                        <th>Numara</th>
+                        <th>Ekip</th>
+                        <th>İşlemler</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for ogrenci in ogrenciler %}
+                    <tr>
+                        <td>{{ ogrenci.id }}</td>
+                        <td><strong>{{ ogrenci.tam_ad }}</strong></td>
+                        <td>{{ ogrenci.numara }}</td>
+                        <td>
+                            {% if ogrenci.ekip %}
+                                <span class="badge bg-primary">{{ ogrenci.ekip.isim }}</span>
+                            {% else %}
+                                <span class="text-muted">-</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <button class="btn btn-sm btn-outline-primary" onclick="editOgrenci({{ ogrenci.id }}, '{{ ogrenci.ad }}', '{{ ogrenci.soyad }}', '{{ ogrenci.numara }}', {{ ogrenci.ekip_id if ogrenci.ekip_id else 'null' }})">
+                                <i class="bi bi-pencil"></i> Düzenle
+                            </button>
+                            <form method="POST" action="{{ url_for('admin_ogrenci') }}" style="display: inline;" onsubmit="return confirm('Bu öğrenciyi silmek istediğinize emin misiniz?');">
+                                <input type="hidden" name="sil" value="1">
+                                <input type="hidden" name="ogrenci_id" value="{{ ogrenci.id }}">
+                                <button type="submit" class="btn btn-sm btn-outline-danger">
+                                    <i class="bi bi-trash"></i> Sil
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="text-center py-5">
+            <i class="bi bi-inbox" style="font-size: 3rem; color: #ccc;"></i>
+            <p class="text-muted mt-3">Henüz öğrenci eklenmemiş.</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Düzenleme Modal -->
+<div class="modal fade" id="editModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Öğrenci Düzenle</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="POST" action="{{ url_for('admin_ogrenci') }}">
+                <div class="modal-body">
+                    <input type="hidden" name="duzenle" value="1">
+                    <input type="hidden" name="ogrenci_id" id="edit_ogrenci_id">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Ad</label>
+                            <input type="text" class="form-control" name="ad" id="edit_ogrenci_ad" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Soyad</label>
+                            <input type="text" class="form-control" name="soyad" id="edit_ogrenci_soyad" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Numara</label>
+                            <input type="text" class="form-control" name="numara" id="edit_ogrenci_numara" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Ekip</label>
+                            <select class="form-select" name="ekip_id" id="edit_ogrenci_ekip">
+                                <option value="">Ekip Seçiniz</option>
+                                {% for ekip in ekipler %}
+                                <option value="{{ ekip.id }}">{{ ekip.isim }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">İptal</button>
+                    <button type="submit" class="btn btn-success">Kaydet</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+function toggleForm() {
+    const form = document.getElementById('ogrenciForm');
+    form.classList.toggle('show');
+}
+
+function editOgrenci(id, ad, soyad, numara, ekipId) {
+    document.getElementById('edit_ogrenci_id').value = id;
+    document.getElementById('edit_ogrenci_ad').value = ad;
+    document.getElementById('edit_ogrenci_soyad').value = soyad;
+    document.getElementById('edit_ogrenci_numara').value = numara;
+    document.getElementById('edit_ogrenci_ekip').value = ekipId || '';
+    new bootstrap.Modal(document.getElementById('editModal')).show();
+}
+</script>
+{% endblock %}
+
+

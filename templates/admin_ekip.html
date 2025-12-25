@@ -1,0 +1,182 @@
+{% extends 'base.html' %}
+
+{% block title %}Ekip Yönetimi{% endblock %}
+
+{% block extra_css %}
+<style>
+    .list-card {
+        border: 1px solid #e5e7eb;
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+        margin-bottom: 20px;
+    }
+    
+    .list-header {
+        background: #f9fafb;
+        padding: 15px 20px;
+        border-bottom: 1px solid #e5e7eb;
+        border-radius: 12px 12px 0 0;
+        display: flex;
+        justify-content: between;
+        align-items: center;
+    }
+    
+    .form-card {
+        border: 1px solid #e5e7eb;
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+        margin-bottom: 20px;
+        display: none;
+    }
+    
+    .form-card.show {
+        display: block;
+    }
+    
+    .table-hover tbody tr:hover {
+        background-color: #f9fafb;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h3 class="fw-bold mb-0">
+        <i class="bi bi-people-fill text-primary"></i> Ekip Yönetimi
+    </h3>
+    <button class="btn btn-primary" onclick="toggleForm()">
+        <i class="bi bi-plus-circle"></i> Yeni Ekip Ekle
+    </button>
+</div>
+
+<!-- Ekleme Formu -->
+<div class="form-card" id="ekipForm">
+    <div class="list-header">
+        <h5 class="mb-0 fw-bold">
+            <i class="bi bi-plus-circle"></i> Yeni Ekip Ekle
+        </h5>
+        <button class="btn btn-sm btn-outline-secondary" onclick="toggleForm()">
+            <i class="bi bi-x"></i> Kapat
+        </button>
+    </div>
+    <div class="card-body p-4">
+        <form method="POST" action="{{ url_for('admin_ekip') }}">
+            <input type="hidden" name="ekle" value="1">
+            <div class="mb-3">
+                <label class="form-label fw-bold">Ekip İsmi <span class="text-danger">*</span></label>
+                <input type="text" class="form-control" name="isim" required placeholder="Örn: Ekip 1">
+            </div>
+            <div class="mb-3">
+                <label class="form-label fw-bold">Açıklama</label>
+                <textarea class="form-control" name="aciklama" rows="3" placeholder="Ekip hakkında açıklama"></textarea>
+            </div>
+            <button type="submit" class="btn btn-primary">
+                <i class="bi bi-check-circle"></i> Kaydet
+            </button>
+        </form>
+    </div>
+</div>
+
+<!-- Liste -->
+<div class="list-card">
+    <div class="list-header">
+        <h5 class="mb-0 fw-bold">
+            <i class="bi bi-list-ul"></i> Ekip Listesi ({{ ekipler|length }})
+        </h5>
+    </div>
+    <div class="card-body p-0">
+        {% if ekipler %}
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>ID</th>
+                        <th>Ekip İsmi</th>
+                        <th>Üye Sayısı</th>
+                        <th>Açıklama</th>
+                        <th>İşlemler</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for ekip in ekipler %}
+                    <tr id="row-{{ ekip.id }}">
+                        <td>{{ ekip.id }}</td>
+                        <td><strong>{{ ekip.isim }}</strong></td>
+                        <td>
+                            <span class="badge bg-primary">{{ ekip.ogrenciler|length }}</span>
+                        </td>
+                        <td>
+                            <small class="text-muted">{{ ekip.aciklama[:50] if ekip.aciklama else '-' }}{% if ekip.aciklama and ekip.aciklama|length > 50 %}...{% endif %}</small>
+                        </td>
+                        <td>
+                            <button class="btn btn-sm btn-outline-primary" onclick="editEkip({{ ekip.id }}, '{{ ekip.isim }}', '{{ ekip.aciklama|replace("'", "\\'") if ekip.aciklama else "" }}')">
+                                <i class="bi bi-pencil"></i> Düzenle
+                            </button>
+                            <form method="POST" action="{{ url_for('admin_ekip') }}" style="display: inline;" onsubmit="return confirm('Bu ekibi silmek istediğinize emin misiniz?');">
+                                <input type="hidden" name="sil" value="1">
+                                <input type="hidden" name="ekip_id" value="{{ ekip.id }}">
+                                <button type="submit" class="btn btn-sm btn-outline-danger">
+                                    <i class="bi bi-trash"></i> Sil
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="text-center py-5">
+            <i class="bi bi-inbox" style="font-size: 3rem; color: #ccc;"></i>
+            <p class="text-muted mt-3">Henüz ekip eklenmemiş.</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Düzenleme Modal -->
+<div class="modal fade" id="editModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Ekip Düzenle</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="POST" action="{{ url_for('admin_ekip') }}">
+                <div class="modal-body">
+                    <input type="hidden" name="duzenle" value="1">
+                    <input type="hidden" name="ekip_id" id="edit_ekip_id">
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Ekip İsmi</label>
+                        <input type="text" class="form-control" name="isim" id="edit_ekip_isim" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Açıklama</label>
+                        <textarea class="form-control" name="aciklama" id="edit_ekip_aciklama" rows="3"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">İptal</button>
+                    <button type="submit" class="btn btn-primary">Kaydet</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+function toggleForm() {
+    const form = document.getElementById('ekipForm');
+    form.classList.toggle('show');
+}
+
+function editEkip(id, isim, aciklama) {
+    document.getElementById('edit_ekip_id').value = id;
+    document.getElementById('edit_ekip_isim').value = isim;
+    document.getElementById('edit_ekip_aciklama').value = aciklama;
+    new bootstrap.Modal(document.getElementById('editModal')).show();
+}
+</script>
+{% endblock %}
+
+

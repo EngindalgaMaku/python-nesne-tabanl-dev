@@ -1,0 +1,157 @@
+<!-- Ekip Düzenleme Modal -->
+<div class="modal fade" id="editEkipModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Ekip Düzenle</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="POST" action="{{ url_for('admin_ekip') }}">
+                <div class="modal-body">
+                    <input type="hidden" name="duzenle" value="1">
+                    <input type="hidden" name="ekip_id" id="edit_ekip_id">
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Ekip İsmi</label>
+                        <input type="text" class="form-control" name="isim" id="edit_ekip_isim" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Açıklama</label>
+                        <textarea class="form-control" name="aciklama" id="edit_ekip_aciklama" rows="3"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">İptal</button>
+                    <button type="submit" class="btn btn-primary">Kaydet</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Öğrenci Düzenleme Modal -->
+<div class="modal fade" id="editOgrenciModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Öğrenci Düzenle</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="POST" action="{{ url_for('admin_ogrenci') }}">
+                <div class="modal-body">
+                    <input type="hidden" name="duzenle" value="1">
+                    <input type="hidden" name="ogrenci_id" id="edit_ogrenci_id">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Ad</label>
+                            <input type="text" class="form-control" name="ad" id="edit_ogrenci_ad" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Soyad</label>
+                            <input type="text" class="form-control" name="soyad" id="edit_ogrenci_soyad" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Numara</label>
+                            <input type="text" class="form-control" name="numara" id="edit_ogrenci_numara" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Ekip</label>
+                            <select class="form-select" name="ekip_id" id="edit_ogrenci_ekip">
+                                <option value="">Ekip Seçiniz</option>
+                                {% for ekip in ekipler %}
+                                <option value="{{ ekip.id }}">{{ ekip.isim }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">İptal</button>
+                    <button type="submit" class="btn btn-success">Kaydet</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Öğretmen Düzenleme Modal -->
+<div class="modal fade" id="editOgretmenModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Öğretmen Düzenle</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="POST" action="{{ url_for('admin_ogretmen') }}">
+                <div class="modal-body">
+                    <input type="hidden" name="duzenle" value="1">
+                    <input type="hidden" name="ogretmen_id" id="edit_ogretmen_id">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Ad</label>
+                            <input type="text" class="form-control" name="ad" id="edit_ogretmen_ad" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Soyad</label>
+                            <input type="text" class="form-control" name="soyad" id="edit_ogretmen_soyad" required>
+                        </div>
+                        <div class="col-md-12 mb-3">
+                            <label class="form-label fw-bold">Unvan</label>
+                            <input type="text" class="form-control" name="unvan" id="edit_ogretmen_unvan">
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">İptal</button>
+                    <button type="submit" class="btn btn-info text-white">Kaydet</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Sunum Düzenleme Modal -->
+<div class="modal fade" id="editSunumModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Sunum Düzenle</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="POST" action="{{ url_for('admin_sunum') }}">
+                <div class="modal-body">
+                    <input type="hidden" name="duzenle" value="1">
+                    <input type="hidden" name="sunum_id" id="edit_sunum_id">
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Başlık</label>
+                        <input type="text" class="form-control" name="baslik" id="edit_sunum_baslik" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Açıklama</label>
+                        <textarea class="form-control" name="aciklama" id="edit_sunum_aciklama" rows="3"></textarea>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Sunum Tarihi</label>
+                            <input type="datetime-local" class="form-control" name="sunum_tarihi" id="edit_sunum_tarihi" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Ekip</label>
+                            <select class="form-select" name="ekip_id" id="edit_sunum_ekip" required>
+                                <option value="">Ekip Seçiniz</option>
+                                {% for ekip in ekipler %}
+                                <option value="{{ ekip.id }}">{{ ekip.isim }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">İptal</button>
+                    <button type="submit" class="btn btn-warning text-white">Kaydet</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+

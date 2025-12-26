@@ -95,98 +95,55 @@
                         Her kriter için 0-100 arası puan verin. Parantez içindeki yüzdeler kriterlerin ağırlıklarını gösterir.
                     </p>
             
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <div class="kriter-card">
-                                <label class="d-flex justify-content-between align-items-center mb-2">
-                                    <span class="fw-bold">Konu Hakimiyeti</span>
-                                    <span class="badge bg-primary">%15</span>
-                                </label>
-                                <input type="number" class="form-control kriter-input" 
-                                       name="konu_hakimiyeti" min="0" max="100" step="0.1" 
-                                       placeholder="0-100" required>
-                                <small class="text-muted">Sunum konusuna ne kadar hakim?</small>
+                    <div class="kriter-list">
+                        <div class="kriter-row">
+                            <div class="kriter-title">
+                                <span class="fw-bold">Konu Hakimiyeti</span>
+                                <span class="badge bg-primary">%15</span>
                             </div>
+                            <input type="number" class="form-control kriter-input" name="konu_hakimiyeti" min="0" max="100" step="0.1" placeholder="0-100" required>
                         </div>
-                        
-                        <div class="col-md-6 mb-3">
-                            <div class="kriter-card">
-                                <label class="d-flex justify-content-between align-items-center mb-2">
-                                    <span class="fw-bold">Anlatım</span>
-                                    <span class="badge bg-primary">%15</span>
-                                </label>
-                                <input type="number" class="form-control kriter-input" 
-                                       name="anlatim" min="0" max="100" step="0.1" 
-                                       placeholder="0-100" required>
-                                <small class="text-muted">Sunum anlatımı ne kadar etkili?</small>
+
+                        <div class="kriter-row">
+                            <div class="kriter-title">
+                                <span class="fw-bold">Anlatım</span>
+                                <span class="badge bg-primary">%15</span>
                             </div>
+                            <input type="number" class="form-control kriter-input" name="anlatim" min="0" max="100" step="0.1" placeholder="0-100" required>
                         </div>
-                        
-                        <div class="col-md-6 mb-3">
-                            <div class="kriter-card">
-                                <label class="d-flex justify-content-between align-items-center mb-2">
-                                    <span class="fw-bold">Giyim</span>
-                                    <span class="badge bg-primary">%5</span>
-                                </label>
-                                <input type="number" class="form-control kriter-input" 
-                                       name="giyim" min="0" max="100" step="0.1" 
-                                       placeholder="0-100" required>
-                                <small class="text-muted">Kıyafet uygunluğu nasıl?</small>
+
+                        <div class="kriter-row">
+                            <div class="kriter-title">
+                                <span class="fw-bold">Giyim</span>
+                                <span class="badge bg-primary">%5</span>
                             </div>
+                            <input type="number" class="form-control kriter-input" name="giyim" min="0" max="100" step="0.1" placeholder="0-100" required>
                         </div>
-                        
-                        <div class="col-md-6 mb-3">
-                            <div class="kriter-card">
-                                <label class="d-flex justify-content-between align-items-center mb-2">
-                                    <span class="fw-bold">Ekip Uyumu ve Görev Paylaşımı</span>
-                                    <span class="badge bg-primary">%10</span>
-                                </label>
-                                <input type="number" class="form-control kriter-input" 
-                                       name="ekip_uyumu" min="0" max="100" step="0.1" 
-                                       placeholder="0-100" required>
-                                <small class="text-muted">Ekip içi uyum ve iş bölümü nasıl?</small>
+
+                        <div class="kriter-row">
+                            <div class="kriter-title">
+                                <span class="fw-bold">Ekip Uyumu ve Görev Paylaşımı</span>
+                                <span class="badge bg-primary">%10</span>
                             </div>
+                            <input type="number" class="form-control kriter-input" name="ekip_uyumu" min="0" max="100" step="0.1" placeholder="0-100" required>
                         </div>
-                        
-                        <div class="col-md-6 mb-3">
-                            <div class="kriter-card">
-                                <label class="d-flex justify-content-between align-items-center mb-2">
-                                    <span class="fw-bold">Görsellik</span>
-                                    <span class="badge bg-primary">%35</span>
-                                </label>
-                                <input type="number" class="form-control kriter-input" 
-                                       name="gorsellik" min="0" max="100" step="0.1" 
-                                       placeholder="0-100" required>
-                                <small class="text-muted">Slayt tasarımı ve görsel kalite nasıl?</small>
+
+                        <div class="kriter-row">
+                            <div class="kriter-title">
+                                <span class="fw-bold">Görsellik</span>
+                                <span class="badge bg-primary">%35</span>
                             </div>
+                            <input type="number" class="form-control kriter-input" name="gorsellik" min="0" max="100" step="0.1" placeholder="0-100" required>
                         </div>
-                        
-                        <div class="col-md-6 mb-3">
-                            <div class="kriter-card">
-                                <label class="d-flex justify-content-between align-items-center mb-2">
-                                    <span class="fw-bold">Genel Görüş</span>
-                                    <span class="badge bg-primary">%20</span>
-                                </label>
-                                <input type="number" class="form-control kriter-input" 
-                                       name="genel_gorus" min="0" max="100" step="0.1" 
-                                       placeholder="0-100" required>
-                                <small class="text-muted">Genel olarak sunum nasıldı?</small>
+
+                        <div class="kriter-row mb-0">
+                            <div class="kriter-title">
+                                <span class="fw-bold">Genel Görüş</span>
+                                <span class="badge bg-primary">%20</span>
                             </div>
+                            <input type="number" class="form-control kriter-input" name="genel_gorus" min="0" max="100" step="0.1" placeholder="0-100" required>
                         </div>
                     </div>
-                </div>
-            </div>
-            
-            <div class="card mb-4" style="border: 1px solid #e5e7eb;">
-                <div class="card-header bg-light">
-                    <h6 class="mb-0 fw-bold">
-                        <i class="bi bi-chat-left-text"></i> Yorum (İsteğe Bağlı)
-                    </h6>
-                </div>
-                <div class="card-body">
-                    <textarea class="form-control" name="yorum" rows="4" 
-                              placeholder="Değerlendirme hakkında detaylı yorumlarınızı, önerilerinizi veya geri bildirimlerinizi yazabilirsiniz..."></textarea>
-                    <small class="text-muted">Yapıcı geri bildirimler ekip için çok değerlidir</small>
                 </div>
             </div>
             
@@ -206,25 +163,35 @@
 
 {% block extra_css %}
 <style>
-    .kriter-card {
+    .kriter-list {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .kriter-row {
+        display: grid;
+        grid-template-columns: 1fr 160px;
+        gap: 12px;
+        align-items: center;
         background: #f9fafb;
         border: 1px solid #e5e7eb;
-        border-radius: 8px;
-        padding: 15px;
-        margin-bottom: 15px;
+        border-radius: 10px;
+        padding: 10px 12px;
     }
-    
-    .kriter-card label {
-        font-weight: 500;
-        color: #374151;
-        margin-bottom: 8px;
-        font-size: 0.9rem;
+
+    .kriter-title {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        min-width: 0;
     }
-    
+
     .kriter-input {
         border: 1px solid #d1d5db;
         border-radius: 8px;
-        padding: 10px;
+        padding: 8px 10px;
         font-size: 0.95rem;
         transition: all 0.2s;
     }
@@ -233,15 +200,6 @@
         border-color: #667eea;
         box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
         outline: none;
-    }
-    
-    .kriter-badge {
-        background: #667eea;
-        color: white;
-        padding: 4px 8px;
-        border-radius: 4px;
-        font-size: 0.75rem;
-        font-weight: 500;
     }
     
     .select-enhanced {
@@ -255,6 +213,12 @@
         border-color: #667eea;
         box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
         outline: none;
+    }
+
+    @media (max-width: 576px) {
+        .kriter-row {
+            grid-template-columns: 1fr;
+        }
     }
 </style>
 {% endblock %}

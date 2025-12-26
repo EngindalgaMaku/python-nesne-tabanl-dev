@@ -1,6 +1,9 @@
 from __future__ import annotations
 
+import os
+
 from flask import Flask
+from flask import jsonify
 
 from .controllers import (
     AdminEkipView,
@@ -21,9 +24,22 @@ def register_routes(app: Flask) -> None:
     def favicon():
         return ("", 204)
 
+    def build_info():
+        return jsonify(
+            {
+                "render": {
+                    "service_id": os.getenv("RENDER_SERVICE_ID"),
+                    "service_name": os.getenv("RENDER_SERVICE_NAME"),
+                    "git_commit": os.getenv("RENDER_GIT_COMMIT"),
+                }
+            }
+        )
+
     app.add_url_rule("/", view_func=IndexView.as_view("index"))
 
     app.add_url_rule("/favicon.ico", view_func=favicon)
+
+    app.add_url_rule("/__build", view_func=build_info)
 
     app.add_url_rule(
         "/login",

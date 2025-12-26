@@ -14,7 +14,7 @@ def _ensure_sqlite_columns(app: Flask) -> None:
     if not uri or not str(uri).startswith("sqlite"):
         return
 
-    engine = db.get_engine(app)
+    engine = db.engine
     with engine.connect() as conn:
         table_rows = conn.exec_driver_sql(
             "SELECT name FROM sqlite_master WHERE type='table' AND name='ayarlar'"

@@ -122,15 +122,6 @@ class DegerlendirmeYapView(MethodView):
     def get(self, sunum_id: int):
         sunum = Sunum.query.get_or_404(sunum_id)
 
-        kriter_etiketleri = {
-            "konu_hakimiyeti": "Konu Hakimiyeti",
-            "anlatim": "Anlatım",
-            "giyim": "Giyim",
-            "ekip_uyumu": "Ekip Uyumu ve Görev Paylaşımı",
-            "gorsellik": "Görsellik",
-            "genel_gorus": "Genel Görüş",
-        }
-
         # Öğrenci aynı sunuma birden fazla değerlendirme yapamasın:
         # formdaki listeden daha önce değerlendirme yapan öğrencileri çıkar.
         existing_student_rows = (
@@ -155,20 +146,32 @@ class DegerlendirmeYapView(MethodView):
         kriterler = [
             {
                 "key": "konu_hakimiyeti",
-                "label": kriter_etiketleri["konu_hakimiyeti"],
+                "label": ayarlar_obj.konu_hakimiyeti_etiket or "Konu Hakimiyeti",
                 "weight": ayarlar_obj.konu_hakimiyeti_agirlik,
             },
-            {"key": "anlatim", "label": kriter_etiketleri["anlatim"], "weight": ayarlar_obj.anlatim_agirlik},
-            {"key": "giyim", "label": kriter_etiketleri["giyim"], "weight": ayarlar_obj.giyim_agirlik},
+            {
+                "key": "anlatim",
+                "label": ayarlar_obj.anlatim_etiket or "Anlatım",
+                "weight": ayarlar_obj.anlatim_agirlik,
+            },
+            {
+                "key": "giyim",
+                "label": ayarlar_obj.giyim_etiket or "Giyim",
+                "weight": ayarlar_obj.giyim_agirlik,
+            },
             {
                 "key": "ekip_uyumu",
-                "label": kriter_etiketleri["ekip_uyumu"],
+                "label": ayarlar_obj.ekip_uyumu_etiket or "Ekip Uyumu ve Görev Paylaşımı",
                 "weight": ayarlar_obj.ekip_uyumu_agirlik,
             },
-            {"key": "gorsellik", "label": kriter_etiketleri["gorsellik"], "weight": ayarlar_obj.gorsellik_agirlik},
+            {
+                "key": "gorsellik",
+                "label": ayarlar_obj.gorsellik_etiket or "Görsellik",
+                "weight": ayarlar_obj.gorsellik_agirlik,
+            },
             {
                 "key": "genel_gorus",
-                "label": kriter_etiketleri["genel_gorus"],
+                "label": ayarlar_obj.genel_gorus_etiket or "Genel Görüş",
                 "weight": ayarlar_obj.genel_gorus_agirlik,
             },
         ]
@@ -264,6 +267,13 @@ class AyarlarView(MethodView):
         ayarlar_obj.ekip_uyumu_agirlik = float(request.form.get("ekip_uyumu_agirlik"))
         ayarlar_obj.gorsellik_agirlik = float(request.form.get("gorsellik_agirlik"))
         ayarlar_obj.genel_gorus_agirlik = float(request.form.get("genel_gorus_agirlik"))
+
+        ayarlar_obj.konu_hakimiyeti_etiket = request.form.get("konu_hakimiyeti_etiket", "Konu Hakimiyeti")
+        ayarlar_obj.anlatim_etiket = request.form.get("anlatim_etiket", "Anlatım")
+        ayarlar_obj.giyim_etiket = request.form.get("giyim_etiket", "Giyim")
+        ayarlar_obj.ekip_uyumu_etiket = request.form.get("ekip_uyumu_etiket", "Ekip Uyumu ve Görev Paylaşımı")
+        ayarlar_obj.gorsellik_etiket = request.form.get("gorsellik_etiket", "Görsellik")
+        ayarlar_obj.genel_gorus_etiket = request.form.get("genel_gorus_etiket", "Genel Görüş")
         ayarlar_obj.ogretmen_notu_agirlik = float(request.form.get("ogretmen_notu_agirlik"))
         ayarlar_obj.ogrenci_notu_agirlik = float(request.form.get("ogrenci_notu_agirlik"))
 

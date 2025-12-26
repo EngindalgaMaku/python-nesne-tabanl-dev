@@ -40,6 +40,13 @@ class Ayarlar(db.Model):
     gorsellik_agirlik = db.Column(db.Float, default=35.0)
     genel_gorus_agirlik = db.Column(db.Float, default=20.0)
 
+    konu_hakimiyeti_etiket = db.Column(db.String(200), default="Konu Hakimiyeti")
+    anlatim_etiket = db.Column(db.String(200), default="Anlatım")
+    giyim_etiket = db.Column(db.String(200), default="Giyim")
+    ekip_uyumu_etiket = db.Column(db.String(200), default="Ekip Uyumu ve Görev Paylaşımı")
+    gorsellik_etiket = db.Column(db.String(200), default="Görsellik")
+    genel_gorus_etiket = db.Column(db.String(200), default="Genel Görüş")
+
     ogretmen_notu_agirlik = db.Column(db.Float, default=60.0)
     ogrenci_notu_agirlik = db.Column(db.Float, default=40.0)
 

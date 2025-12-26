@@ -96,53 +96,15 @@
                     </p>
             
                     <div class="kriter-list">
-                        <div class="kriter-row">
+                        {% for k in kriterler %}
+                        <div class="kriter-row{% if loop.last %} mb-0{% endif %}">
                             <div class="kriter-title">
-                                <span class="fw-bold">Konu Hakimiyeti</span>
-                                <span class="badge bg-primary">%15</span>
+                                <span class="fw-bold">{{ k.label }}</span>
+                                <span class="badge bg-primary">%{{ k.weight|round|int }}</span>
                             </div>
-                            <input type="number" class="form-control kriter-input" name="konu_hakimiyeti" min="0" max="100" step="0.1" placeholder="0-100" required>
+                            <input type="number" class="form-control kriter-input" name="{{ k.key }}" min="0" max="100" step="0.1" placeholder="0-100" required>
                         </div>
-
-                        <div class="kriter-row">
-                            <div class="kriter-title">
-                                <span class="fw-bold">Anlatım</span>
-                                <span class="badge bg-primary">%15</span>
-                            </div>
-                            <input type="number" class="form-control kriter-input" name="anlatim" min="0" max="100" step="0.1" placeholder="0-100" required>
-                        </div>
-
-                        <div class="kriter-row">
-                            <div class="kriter-title">
-                                <span class="fw-bold">Giyim</span>
-                                <span class="badge bg-primary">%5</span>
-                            </div>
-                            <input type="number" class="form-control kriter-input" name="giyim" min="0" max="100" step="0.1" placeholder="0-100" required>
-                        </div>
-
-                        <div class="kriter-row">
-                            <div class="kriter-title">
-                                <span class="fw-bold">Ekip Uyumu ve Görev Paylaşımı</span>
-                                <span class="badge bg-primary">%10</span>
-                            </div>
-                            <input type="number" class="form-control kriter-input" name="ekip_uyumu" min="0" max="100" step="0.1" placeholder="0-100" required>
-                        </div>
-
-                        <div class="kriter-row">
-                            <div class="kriter-title">
-                                <span class="fw-bold">Görsellik</span>
-                                <span class="badge bg-primary">%35</span>
-                            </div>
-                            <input type="number" class="form-control kriter-input" name="gorsellik" min="0" max="100" step="0.1" placeholder="0-100" required>
-                        </div>
-
-                        <div class="kriter-row mb-0">
-                            <div class="kriter-title">
-                                <span class="fw-bold">Genel Görüş</span>
-                                <span class="badge bg-primary">%20</span>
-                            </div>
-                            <input type="number" class="form-control kriter-input" name="genel_gorus" min="0" max="100" step="0.1" placeholder="0-100" required>
-                        </div>
+                        {% endfor %}
                     </div>
                 </div>
             </div>

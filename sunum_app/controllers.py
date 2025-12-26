@@ -122,6 +122,15 @@ class DegerlendirmeYapView(MethodView):
     def get(self, sunum_id: int):
         sunum = Sunum.query.get_or_404(sunum_id)
 
+        kriter_etiketleri = {
+            "konu_hakimiyeti": "Konu Hakimiyeti",
+            "anlatim": "Anlatım",
+            "giyim": "Giyim",
+            "ekip_uyumu": "Ekip Uyumu ve Görev Paylaşımı",
+            "gorsellik": "Görsellik",
+            "genel_gorus": "Genel Görüş",
+        }
+
         # Öğrenci aynı sunuma birden fazla değerlendirme yapamasın:
         # formdaki listeden daha önce değerlendirme yapan öğrencileri çıkar.
         existing_student_rows = (
@@ -142,11 +151,34 @@ class DegerlendirmeYapView(MethodView):
         ogrenciler = query.all()
         ogretmenler = Ogretmen.query.all()
 
+        ayarlar_obj = Ayarlar.get_aktif_ayarlar()
+        kriterler = [
+            {
+                "key": "konu_hakimiyeti",
+                "label": kriter_etiketleri["konu_hakimiyeti"],
+                "weight": ayarlar_obj.konu_hakimiyeti_agirlik,
+            },
+            {"key": "anlatim", "label": kriter_etiketleri["anlatim"], "weight": ayarlar_obj.anlatim_agirlik},
+            {"key": "giyim", "label": kriter_etiketleri["giyim"], "weight": ayarlar_obj.giyim_agirlik},
+            {
+                "key": "ekip_uyumu",
+                "label": kriter_etiketleri["ekip_uyumu"],
+                "weight": ayarlar_obj.ekip_uyumu_agirlik,
+            },
+            {"key": "gorsellik", "label": kriter_etiketleri["gorsellik"], "weight": ayarlar_obj.gorsellik_agirlik},
+            {
+                "key": "genel_gorus",
+                "label": kriter_etiketleri["genel_gorus"],
+                "weight": ayarlar_obj.genel_gorus_agirlik,
+            },
+        ]
+
         return render_template(
             "degerlendirme_yap.html",
             sunum=sunum,
             ogrenciler=ogrenciler,
             ogretmenler=ogretmenler,
+            kriterler=kriterler,
         )
 
     def post(self, sunum_id: int):

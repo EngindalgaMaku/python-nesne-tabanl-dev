@@ -42,7 +42,7 @@
             
             <div class="row mb-4">
                 <div class="col-md-6 mb-3">
-                    <label class="form-label fw-bold">Konu Hakimiyeti Ağırlığı (%)</label>
+                    <label class="form-label fw-bold">{{ ayarlar.konu_hakimiyeti_etiket or 'Konu Hakimiyeti' }} Ağırlığı (%)</label>
                     <div class="d-flex align-items-center gap-3">
                         <input type="range" class="form-range weight-range" min="0" max="100" step="1" value="{{ ayarlar.konu_hakimiyeti_agirlik }}" data-target="konu_hakimiyeti_agirlik" style="flex: 1;">
                         <span class="badge bg-primary" data-badge="konu_hakimiyeti_agirlik">0%</span>
@@ -51,7 +51,7 @@
                 </div>
                 
                 <div class="col-md-6 mb-3">
-                    <label class="form-label fw-bold">Anlatım Ağırlığı (%)</label>
+                    <label class="form-label fw-bold">{{ ayarlar.anlatim_etiket or 'Anlatım' }} Ağırlığı (%)</label>
                     <div class="d-flex align-items-center gap-3">
                         <input type="range" class="form-range weight-range" min="0" max="100" step="1" value="{{ ayarlar.anlatim_agirlik }}" data-target="anlatim_agirlik" style="flex: 1;">
                         <span class="badge bg-primary" data-badge="anlatim_agirlik">0%</span>
@@ -60,7 +60,7 @@
                 </div>
                 
                 <div class="col-md-6 mb-3">
-                    <label class="form-label fw-bold">Giyim Ağırlığı (%)</label>
+                    <label class="form-label fw-bold">{{ ayarlar.giyim_etiket or 'Giyim' }} Ağırlığı (%)</label>
                     <div class="d-flex align-items-center gap-3">
                         <input type="range" class="form-range weight-range" min="0" max="100" step="1" value="{{ ayarlar.giyim_agirlik }}" data-target="giyim_agirlik" style="flex: 1;">
                         <span class="badge bg-primary" data-badge="giyim_agirlik">0%</span>
@@ -69,7 +69,7 @@
                 </div>
                 
                 <div class="col-md-6 mb-3">
-                    <label class="form-label fw-bold">Ekip Uyumu Ağırlığı (%)</label>
+                    <label class="form-label fw-bold">{{ ayarlar.ekip_uyumu_etiket or 'Ekip Uyumu ve Görev Paylaşımı' }} Ağırlığı (%)</label>
                     <div class="d-flex align-items-center gap-3">
                         <input type="range" class="form-range weight-range" min="0" max="100" step="1" value="{{ ayarlar.ekip_uyumu_agirlik }}" data-target="ekip_uyumu_agirlik" style="flex: 1;">
                         <span class="badge bg-primary" data-badge="ekip_uyumu_agirlik">0%</span>
@@ -78,7 +78,7 @@
                 </div>
                 
                 <div class="col-md-6 mb-3">
-                    <label class="form-label fw-bold">Görsellik Ağırlığı (%)</label>
+                    <label class="form-label fw-bold">{{ ayarlar.gorsellik_etiket or 'Görsellik' }} Ağırlığı (%)</label>
                     <div class="d-flex align-items-center gap-3">
                         <input type="range" class="form-range weight-range" min="0" max="100" step="1" value="{{ ayarlar.gorsellik_agirlik }}" data-target="gorsellik_agirlik" style="flex: 1;">
                         <span class="badge bg-primary" data-badge="gorsellik_agirlik">0%</span>
@@ -87,7 +87,7 @@
                 </div>
                 
                 <div class="col-md-6 mb-3">
-                    <label class="form-label fw-bold">Genel Görüş Ağırlığı (%)</label>
+                    <label class="form-label fw-bold">{{ ayarlar.genel_gorus_etiket or 'Genel Görüş' }} Ağırlığı (%)</label>
                     <div class="d-flex align-items-center gap-3">
                         <input type="range" class="form-range weight-range" min="0" max="100" step="1" value="{{ ayarlar.genel_gorus_agirlik }}" data-target="genel_gorus_agirlik" style="flex: 1;">
                         <span class="badge bg-primary" data-badge="genel_gorus_agirlik">0%</span>

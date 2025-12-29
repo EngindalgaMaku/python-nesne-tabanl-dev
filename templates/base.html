@@ -6,6 +6,7 @@
     <title>{% block title %}Sunum Değerlendirme Sistemi{% endblock %}</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <link rel="icon" href="{{ url_for('static', filename='favicon.svg') }}" type="image/svg+xml">
     <style>
         :root {
             --primary-color: #4f46e5;
@@ -130,7 +131,7 @@
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                                 <i class="bi bi-shield-lock"></i> Admin İşlemleri
-                                <span class="admin-badge">ADMIN</span>
+                                <span class="badge rounded-pill bg-danger ms-2">ADMIN</span>
                             </a>
                             <ul class="dropdown-menu dropdown-menu-end">
                                 <li>
@@ -172,27 +173,24 @@
 
     <div class="container-fluid">
         <div class="main-container">
-            {% if current_user.is_authenticated and current_user.is_admin %}
-                <div class="alert alert-dark border-0" role="alert" style="background: rgba(17,24,39,0.06); border-left: 4px solid #111827;">
-                    <i class="bi bi-shield-lock-fill"></i>
-                    <strong>Admin Modu Aktif:</strong> Bu ekrandaki bazı işlemler (ekle/sil/düzenle) yalnızca admin kullanıcılar içindir.
-                </div>
-            {% endif %}
 
             {% with messages = get_flashed_messages(with_categories=true) %}
                 {% if messages %}
+                    {% set category_map = {
+                        'success': {'icon': 'bi-check-circle-fill', 'class': 'success'},
+                        'error': {'icon': 'bi-x-octagon-fill', 'class': 'danger'},
+                        'danger': {'icon': 'bi-x-octagon-fill', 'class': 'danger'},
+                        'warning': {'icon': 'bi-exclamation-triangle-fill', 'class': 'warning'},
+                        'info': {'icon': 'bi-info-circle-fill', 'class': 'info'}
+                    } %}
                     {% for category, message in messages %}
-                        {% set alert_type = 'info' %}
-                        {% if category in ['error', 'danger'] %}
-                            {% set alert_type = 'danger' %}
-                        {% elif category == 'success' %}
-                            {% set alert_type = 'success' %}
-                        {% elif category == 'warning' %}
-                            {% set alert_type = 'warning' %}
-                        {% endif %}
-                        <div class="alert alert-{{ alert_type }} alert-dismissible fade show" role="alert">
-                            {{ message }}
-                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        {% set alert_config = category_map.get(category, category_map['info']) %}
+                        <div class="alert alert-{{ alert_config.class }} alert-dismissible fade show d-flex align-items-center" role="alert">
+                            <i class="bi {{ alert_config.icon }} me-3" style="font-size: 1.25rem;"></i>
+                            <div>
+                                {{ message }}
+                            </div>
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                         </div>
                     {% endfor %}
                 {% endif %}

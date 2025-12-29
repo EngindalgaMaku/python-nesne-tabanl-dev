@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from datetime import datetime
 
+from sqlalchemy import or_
 from sqlalchemy.exc import IntegrityError
 from flask import flash, redirect, render_template, request, url_for
 from flask.views import MethodView
@@ -70,15 +71,76 @@ class AdminPanelView(MethodView):
             flash("Bu sayfaya erişim yetkiniz yok!", "error")
             return redirect(url_for("index"))
 
+        ogr_q = (request.args.get("ogr_q") or "").strip()
+        ogr_ekip_id = (request.args.get("ogr_ekip_id") or "").strip()
+
+        try:
+            ogr_page = int(request.args.get("ogr_page", 1))
+        except (TypeError, ValueError):
+            ogr_page = 1
+
+        try:
+            ogr_per_page = int(request.args.get("ogr_per_page", 10))
+        except (TypeError, ValueError):
+            ogr_per_page = 10
+
+        if ogr_per_page not in (10, 25, 50, 100):
+            ogr_per_page = 10
+
+        try:
+            deg_page = int(request.args.get("deg_page", 1))
+        except (TypeError, ValueError):
+            deg_page = 1
+
+        try:
+            deg_per_page = int(request.args.get("deg_per_page", 10))
+        except (TypeError, ValueError):
+            deg_per_page = 10
+
+        if deg_per_page not in (10, 25, 50, 100):
+            deg_per_page = 10
+
         ekip_sayisi = Ekip.query.count()
         ogrenci_sayisi = Ogrenci.query.count()
         ogretmen_sayisi = Ogretmen.query.count()
         sunum_sayisi = Sunum.query.count()
 
         ekipler = Ekip.query.all()
-        ogrenciler = Ogrenci.query.all()
+
+        ogr_query = Ogrenci.query
+
+        if ogr_q:
+            like = f"%{ogr_q}%"
+            ogr_query = ogr_query.filter(
+                or_(
+                    Ogrenci.ad.ilike(like),
+                    Ogrenci.soyad.ilike(like),
+                    Ogrenci.numara.ilike(like),
+                )
+            )
+
+        if ogr_ekip_id:
+            try:
+                ogr_ekip_id_int = int(ogr_ekip_id)
+                ogr_query = ogr_query.filter(Ogrenci.ekip_id == ogr_ekip_id_int)
+            except (TypeError, ValueError):
+                ogr_ekip_id = ""
+
+        ogr_query = ogr_query.order_by(Ogrenci.id.asc())
+        ogr_pagination = ogr_query.paginate(page=ogr_page, per_page=ogr_per_page, error_out=False)
+        ogrenciler = ogr_pagination.items
+
         ogretmenler = Ogretmen.query.all()
         sunumlar = Sunum.query.all()
+
+        deg_query = Degerlendirme.query.order_by(Degerlendirme.id.desc())
+        deg_pagination = deg_query.paginate(page=deg_page, per_page=deg_per_page, error_out=False)
+
+        servis = NotHesaplamaServisi()
+        degerlendirmeler_with_avg = [
+            {"degerlendirme": d, "ortalama": servis.hesapla_agirlikli_ortalama(d)}
+            for d in deg_pagination.items
+        ]
 
         return render_template(
             "admin.html",
@@ -88,9 +150,42 @@ class AdminPanelView(MethodView):
             sunum_sayisi=sunum_sayisi,
             ekipler=ekipler,
             ogrenciler=ogrenciler,
+            ogr_pagination=ogr_pagination,
+            ogr_q=ogr_q,
+            ogr_ekip_id=ogr_ekip_id,
+            ogr_per_page=ogr_per_page,
+            degerlendirmeler_with_avg=degerlendirmeler_with_avg,
+            deg_pagination=deg_pagination,
+            deg_per_page=deg_per_page,
             ogretmenler=ogretmenler,
             sunumlar=sunumlar,
         )
+
+
+class AdminDegerlendirmeView(MethodView):
+    decorators = [login_required]
+
+    def post(self):
+        if not current_user.is_admin:
+            return redirect(url_for("index"))
+
+        if "sil" in request.form:
+            try:
+                degerlendirme_id = int(request.form.get("degerlendirme_id"))
+            except (TypeError, ValueError):
+                flash("Geçersiz değerlendirme seçimi!", "error")
+                return redirect(url_for("admin_panel") + "#degerlendirme")
+
+            degerlendirme = Degerlendirme.query.get(degerlendirme_id)
+            if not degerlendirme:
+                flash("Değerlendirme bulunamadı!", "error")
+                return redirect(url_for("admin_panel") + "#degerlendirme")
+
+            db.session.delete(degerlendirme)
+            db.session.commit()
+            flash("Değerlendirme başarıyla silindi!", "success")
+
+        return redirect(url_for("admin_panel") + "#degerlendirme")
 
 
 class SunumDetayView(MethodView):
@@ -348,9 +443,55 @@ class AdminOgrenciView(MethodView):
     def get(self):
         if not current_user.is_admin:
             return redirect(url_for("index"))
-        ogrenciler = Ogrenci.query.all()
-        ekipler = Ekip.query.all()
-        return render_template("admin_ogrenci.html", ogrenciler=ogrenciler, ekipler=ekipler)
+
+        q = (request.args.get("q") or "").strip()
+        ekip_id = (request.args.get("ekip_id") or "").strip()
+
+        try:
+            page = int(request.args.get("page", 1))
+        except (TypeError, ValueError):
+            page = 1
+
+        try:
+            per_page = int(request.args.get("per_page", 25))
+        except (TypeError, ValueError):
+            per_page = 25
+
+        if per_page not in (10, 25, 50, 100):
+            per_page = 25
+
+        query = Ogrenci.query
+
+        if q:
+            like = f"%{q}%"
+            query = query.filter(
+                or_(
+                    Ogrenci.ad.ilike(like),
+                    Ogrenci.soyad.ilike(like),
+                    Ogrenci.numara.ilike(like),
+                )
+            )
+
+        if ekip_id:
+            try:
+                ekip_id_int = int(ekip_id)
+                query = query.filter(Ogrenci.ekip_id == ekip_id_int)
+            except (TypeError, ValueError):
+                ekip_id = ""
+
+        query = query.order_by(Ogrenci.id.asc())
+        pagination = query.paginate(page=page, per_page=per_page, error_out=False)
+
+        ekipler = Ekip.query.order_by(Ekip.isim.asc()).all()
+        return render_template(
+            "admin_ogrenci.html",
+            ogrenciler=pagination.items,
+            ekipler=ekipler,
+            pagination=pagination,
+            q=q,
+            ekip_id=ekip_id,
+            per_page=per_page,
+        )
 
     def post(self):
         if not current_user.is_admin:

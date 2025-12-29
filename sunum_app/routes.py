@@ -7,6 +7,7 @@ from flask import jsonify
 
 from .controllers import (
     AdminEkipView,
+    AdminDegerlendirmeView,
     AdminOgretmenView,
     AdminOgrenciView,
     AdminPanelView,
@@ -71,6 +72,11 @@ def register_routes(app: Flask) -> None:
         "/admin/ekip",
         view_func=AdminEkipView.as_view("admin_ekip"),
         methods=["GET", "POST"],
+    )
+    app.add_url_rule(
+        "/admin/degerlendirme",
+        view_func=AdminDegerlendirmeView.as_view("admin_degerlendirme"),
+        methods=["POST"],
     )
     app.add_url_rule(
         "/admin/ogrenci",

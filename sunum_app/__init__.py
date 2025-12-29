@@ -2,10 +2,12 @@ from __future__ import annotations
 
 from pathlib import Path
 
+import click
+from sqlalchemy.exc import IntegrityError
 from flask import Flask
 
 from .extensions import db, login_manager
-from .models import User
+from .models import Ekip, Ogrenci, User
 from .routes import register_routes
 
 
@@ -63,6 +65,91 @@ def create_app() -> Flask:
         return User.query.get(int(user_id))
 
     register_routes(app)
+
+    @app.cli.command("seed-sample-data")
+    def seed_sample_data() -> None:
+        ekip_isimleri = [
+            "Kutup Yıldızları",
+            "Anadolu Kartalları",
+            "Gökyüzü Mühendisleri",
+            "Mavi Ufuklar",
+            "Bilim Yolcuları",
+        ]
+
+        ogrenciler_by_ekip = {
+            "Kutup Yıldızları": [
+                ("Ahmet", "Yılmaz"),
+                ("Elif", "Kaya"),
+                ("Mehmet", "Demir"),
+                ("Zeynep", "Çelik"),
+                ("Mert", "Aydın"),
+            ],
+            "Anadolu Kartalları": [
+                ("Ayşe", "Şahin"),
+                ("Mustafa", "Koç"),
+                ("Fatma", "Öztürk"),
+                ("Emre", "Arslan"),
+                ("Sude", "Yıldırım"),
+            ],
+            "Gökyüzü Mühendisleri": [
+                ("Can", "Kurt"),
+                ("Ceren", "Aslan"),
+                ("Oğuz", "Yalçın"),
+                ("Buse", "Polat"),
+                ("Kerem", "Güneş"),
+            ],
+            "Mavi Ufuklar": [
+                ("Ece", "Taş"),
+                ("Yusuf", "Korkmaz"),
+                ("İrem", "Doğan"),
+                ("Berk", "Aksoy"),
+                ("Deniz", "Kaplan"),
+            ],
+            "Bilim Yolcuları": [
+                ("Hakan", "Erdoğan"),
+                ("Gizem", "Sezer"),
+                ("Ömer", "Kılıç"),
+                ("Duygu", "Çetin"),
+                ("Kaan", "Bulut"),
+            ],
+        }
+
+        existing_ekipler = {e.isim: e for e in Ekip.query.all()}
+        created_teams = 0
+        for ekip_adi in ekip_isimleri:
+            if ekip_adi not in existing_ekipler:
+                ekip = Ekip(isim=ekip_adi, aciklama="")
+                db.session.add(ekip)
+                existing_ekipler[ekip_adi] = ekip
+                created_teams += 1
+
+        if created_teams:
+            db.session.commit()
+            existing_ekipler = {e.isim: e for e in Ekip.query.all()}
+
+        base_numara = 1001
+        created_students = 0
+        i = 0
+        for ekip_adi in ekip_isimleri:
+            ekip = existing_ekipler[ekip_adi]
+            for ad, soyad in ogrenciler_by_ekip.get(ekip_adi, []):
+                numara = str(base_numara + i)
+                i += 1
+                if Ogrenci.query.filter_by(numara=numara).first():
+                    continue
+                ogrenci = Ogrenci(ad=ad, soyad=soyad, numara=numara, ekip_id=ekip.id)
+                db.session.add(ogrenci)
+                try:
+                    db.session.flush()
+                except IntegrityError:
+                    db.session.rollback()
+                    continue
+                created_students += 1
+
+        db.session.commit()
+        click.echo(
+            f"Örnek veri tamamlandı. Eklenen ekip: {created_teams}, eklenen öğrenci: {created_students}."
+        )
 
     with app.app_context():
         db.create_all()

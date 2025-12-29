@@ -42,6 +42,42 @@
     </button>
 </div>
 
+<div class="card border-0" style="box-shadow: 0 4px 15px rgba(0,0,0,0.08); border-radius: 15px; margin-bottom: 20px;">
+    <div class="card-body">
+        <form method="GET" action="{{ url_for('admin_ogrenci') }}" class="row g-3 align-items-end">
+            <div class="col-md-5">
+                <label class="form-label fw-bold">Arama</label>
+                <input type="text" class="form-control" name="q" value="{{ q or '' }}" placeholder="Ad, soyad veya numara">
+            </div>
+            <div class="col-md-4">
+                <label class="form-label fw-bold">Ekip</label>
+                <select class="form-select" name="ekip_id">
+                    <option value="" {% if not ekip_id %}selected{% endif %}>Tümü</option>
+                    {% for ekip in ekipler %}
+                        <option value="{{ ekip.id }}" {% if ekip_id and (ekip_id|int == ekip.id) %}selected{% endif %}>{{ ekip.isim }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label fw-bold">Sayfa Boyutu</label>
+                <select class="form-select" name="per_page">
+                    {% for n in [10, 25, 50, 100] %}
+                        <option value="{{ n }}" {% if per_page == n %}selected{% endif %}>{{ n }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-12 d-flex gap-2">
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-search"></i> Filtrele
+                </button>
+                <a class="btn btn-outline-secondary" href="{{ url_for('admin_ogrenci') }}">
+                    <i class="bi bi-x-circle"></i> Temizle
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
 <!-- Ekleme Formu -->
 <div class="form-card" id="ogrenciForm">
     <div class="list-header">
@@ -89,7 +125,12 @@
 <div class="list-card">
     <div class="list-header">
         <h5 class="mb-0 fw-bold">
-            <i class="bi bi-list-ul"></i> Öğrenci Listesi ({{ ogrenciler|length }})
+            <i class="bi bi-list-ul"></i> Öğrenci Listesi
+            {% if pagination %}
+                <span class="text-muted fw-normal">(Toplam: {{ pagination.total }})</span>
+            {% else %}
+                <span class="text-muted fw-normal">({{ ogrenciler|length }})</span>
+            {% endif %}
         </h5>
     </div>
     <div class="card-body p-0">
@@ -119,7 +160,7 @@
                             {% endif %}
                         </td>
                         <td>
-                            <button class="btn btn-sm btn-outline-primary" onclick="editOgrenci({{ ogrenci.id }}, '{{ ogrenci.ad }}', '{{ ogrenci.soyad }}', '{{ ogrenci.numara }}', {{ ogrenci.ekip_id if ogrenci.ekip_id else 'null' }})">
+                            <button class="btn btn-sm btn-outline-primary" onclick="editOgrenci({{ ogrenci.id }}, {{ ogrenci.ad|tojson }}, {{ ogrenci.soyad|tojson }}, {{ ogrenci.numara|tojson }}, {{ ogrenci.ekip_id|tojson }})">
                                 <i class="bi bi-pencil"></i> Düzenle
                             </button>
                             <form method="POST" action="{{ url_for('admin_ogrenci') }}" style="display: inline;" onsubmit="return confirm('Bu öğrenciyi silmek istediğinize emin misiniz?');">
@@ -143,6 +184,30 @@
         {% endif %}
     </div>
 </div>
+
+{% if pagination and pagination.pages > 1 %}
+<nav aria-label="Öğrenci sayfalama" class="mt-3">
+    <ul class="pagination justify-content-center">
+        <li class="page-item {% if not pagination.has_prev %}disabled{% endif %}">
+            <a class="page-link" href="{{ url_for('admin_ogrenci', page=pagination.prev_num, per_page=per_page, q=q, ekip_id=ekip_id) }}">Önceki</a>
+        </li>
+
+        {% for p in pagination.iter_pages(left_edge=1, left_current=2, right_current=2, right_edge=1) %}
+            {% if p %}
+                <li class="page-item {% if p == pagination.page %}active{% endif %}">
+                    <a class="page-link" href="{{ url_for('admin_ogrenci', page=p, per_page=per_page, q=q, ekip_id=ekip_id) }}">{{ p }}</a>
+                </li>
+            {% else %}
+                <li class="page-item disabled"><span class="page-link">…</span></li>
+            {% endif %}
+        {% endfor %}
+
+        <li class="page-item {% if not pagination.has_next %}disabled{% endif %}">
+            <a class="page-link" href="{{ url_for('admin_ogrenci', page=pagination.next_num, per_page=per_page, q=q, ekip_id=ekip_id) }}">Sonraki</a>
+        </li>
+    </ul>
+</nav>
+{% endif %}
 
 <!-- Düzenleme Modal -->
 <div class="modal fade" id="editModal" tabindex="-1">

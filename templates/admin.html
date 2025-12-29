@@ -79,17 +79,17 @@
 {% endblock %}
 
 {% block content %}
-<div class="admin-header">
-    <h1 class="h2 fw-bold mb-2">
-        <i class="bi bi-shield-lock-fill"></i> Admin Paneli
-    </h1>
-    <p class="mb-0 opacity-90">Sistem yönetimi ve veri işlemleri</p>
-</div>
-
-<div class="alert alert-warning border-0" role="alert" style="background: #fef3c7; border-left: 4px solid #f59e0b;">
-    <i class="bi bi-exclamation-triangle-fill"></i>
-    <strong>Admin Alanı:</strong> Bu sayfadaki ekleme/silme/düzenleme işlemleri yalnızca admin kullanıcılar içindir.
-    <strong>Silme</strong> işlemleri geri alınamaz.
+<div class="d-flex justify-content-between align-items-center mb-4 pb-3 border-bottom">
+    <div>
+        <h1 class="h2 fw-bold mb-1">
+            <i class="bi bi-shield-lock-fill"></i> Admin Paneli
+        </h1>
+        <p class="mb-0 text-muted">Sistem yönetimi, veri işlemleri ve ayarlar.</p>
+    </div>
+    <div class="alert alert-warning p-2 mb-0 d-flex align-items-center">
+        <i class="bi bi-exclamation-triangle-fill me-2"></i>
+        <small><strong>Silme</strong> işlemleri geri alınamaz.</small>
+    </div>
 </div>
 
 <!-- İstatistikler -->
@@ -117,7 +117,7 @@
     </div>
     <div class="col-md-3 mb-3">
         <div class="stat-card">
-            <i class="bi bi-presentation-chart-fill icon text-warning"></i>
+            <i class="bi bi-easel-fill icon text-warning"></i>
             <h2>{{ sunum_sayisi }}</h2>
             <p>Sunum</p>
         </div>
@@ -144,6 +144,11 @@
     <li class="nav-item" role="presentation">
         <button class="nav-link" id="sunum-tab" data-bs-toggle="tab" data-bs-target="#sunum" type="button" role="tab">
             <i class="bi bi-presentation-chart"></i> Sunumlar
+        </button>
+    </li>
+    <li class="nav-item" role="presentation">
+        <button class="nav-link" id="degerlendirme-tab" data-bs-toggle="tab" data-bs-target="#degerlendirme" type="button" role="tab">
+            <i class="bi bi-clipboard-check"></i> Değerlendirmeler
         </button>
     </li>
 </ul>
@@ -217,7 +222,7 @@
                                         <input type="hidden" name="sil" value="1">
                                         <input type="hidden" name="ekip_id" value="{{ ekip.id }}">
                                         <button type="submit" class="btn btn-sm btn-outline-danger">
-                                            <i class="bi bi-trash"></i> Sil
+                                            <i class="bi bi-trash"></i> Sil <i class="bi bi-exclamation-octagon-fill text-danger" title="Bu işlem geri alınamaz ve sadece admin tarafından yapılabilir."></i>
                                         </button>
                                     </form>
                                 </td>
@@ -234,6 +239,7 @@
                 {% endif %}
             </div>
         </div>
+
     </div>
     
     <!-- Öğrenci Tab -->
@@ -245,6 +251,42 @@
             <button class="btn btn-success" onclick="toggleOgrenciForm()">
                 <i class="bi bi-plus-circle"></i> Yeni Öğrenci Ekle
             </button>
+        </div>
+
+        <div class="card mb-4">
+            <div class="card-body">
+                <form method="GET" action="{{ url_for('admin_panel') }}" class="row g-3 align-items-end">
+                    <div class="col-md-5">
+                        <label class="form-label fw-bold">Arama</label>
+                        <input type="text" class="form-control" name="ogr_q" value="{{ ogr_q or '' }}" placeholder="Ad, soyad veya numara">
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label fw-bold">Ekip</label>
+                        <select class="form-select" name="ogr_ekip_id">
+                            <option value="" {% if not ogr_ekip_id %}selected{% endif %}>Tümü</option>
+                            {% for ekip in ekipler %}
+                                <option value="{{ ekip.id }}" {% if ogr_ekip_id and (ogr_ekip_id|int == ekip.id) %}selected{% endif %}>{{ ekip.isim }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label fw-bold">Sayfa Boyutu</label>
+                        <select class="form-select" name="ogr_per_page">
+                            {% for n in [10, 25, 50, 100] %}
+                                <option value="{{ n }}" {% if ogr_per_page == n %}selected{% endif %}>{{ n }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-12 d-flex gap-2">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-search"></i> Filtrele
+                        </button>
+                        <a class="btn btn-outline-secondary" href="{{ url_for('admin_panel') }}#ogrenci">
+                            <i class="bi bi-x-circle"></i> Temizle
+                        </a>
+                    </div>
+                </form>
+            </div>
         </div>
         
         <!-- Ekleme Formu -->
@@ -289,7 +331,13 @@
         <!-- Liste -->
         <div class="card">
             <div class="card-header bg-light">
-                <h5 class="mb-0"><i class="bi bi-list-ul"></i> Öğrenci Listesi ({{ ogrenciler|length }})</h5>
+                <h5 class="mb-0"><i class="bi bi-list-ul"></i> Öğrenci Listesi
+                    {% if ogr_pagination %}
+                        <span class="text-muted fw-normal">(Toplam: {{ ogr_pagination.total }})</span>
+                    {% else %}
+                        <span class="text-muted fw-normal">({{ ogrenciler|length }})</span>
+                    {% endif %}
+                </h5>
             </div>
             <div class="card-body p-0">
                 {% if ogrenciler %}
@@ -297,7 +345,6 @@
                     <table class="table table-hover mb-0">
                         <thead class="table-light">
                             <tr>
-                                <th>ID</th>
                                 <th>Ad Soyad</th>
                                 <th>Numara</th>
                                 <th>Ekip</th>
@@ -307,7 +354,6 @@
                         <tbody>
                             {% for ogrenci in ogrenciler %}
                             <tr>
-                                <td>{{ ogrenci.id }}</td>
                                 <td><strong>{{ ogrenci.tam_ad }}</strong></td>
                                 <td>{{ ogrenci.numara }}</td>
                                 <td>
@@ -325,7 +371,7 @@
                                         <input type="hidden" name="sil" value="1">
                                         <input type="hidden" name="ogrenci_id" value="{{ ogrenci.id }}">
                                         <button type="submit" class="btn btn-sm btn-outline-danger">
-                                            <i class="bi bi-trash"></i> Sil
+                                            <i class="bi bi-trash"></i> Sil <i class="bi bi-exclamation-octagon-fill text-danger" title="Bu işlem geri alınamaz ve sadece admin tarafından yapılabilir."></i>
                                         </button>
                                     </form>
                                 </td>
@@ -342,6 +388,30 @@
                 {% endif %}
             </div>
         </div>
+
+        {% if ogr_pagination and ogr_pagination.pages > 1 %}
+        <nav aria-label="Öğrenci sayfalama" class="mt-3">
+            <ul class="pagination justify-content-center">
+                <li class="page-item {% if not ogr_pagination.has_prev %}disabled{% endif %}">
+                    <a class="page-link" href="{{ url_for('admin_panel', ogr_page=ogr_pagination.prev_num, ogr_per_page=ogr_per_page, ogr_q=ogr_q, ogr_ekip_id=ogr_ekip_id) }}#ogrenci">Önceki</a>
+                </li>
+
+                {% for p in ogr_pagination.iter_pages(left_edge=1, left_current=2, right_current=2, right_edge=1) %}
+                    {% if p %}
+                        <li class="page-item {% if p == ogr_pagination.page %}active{% endif %}">
+                            <a class="page-link" href="{{ url_for('admin_panel', ogr_page=p, ogr_per_page=ogr_per_page, ogr_q=ogr_q, ogr_ekip_id=ogr_ekip_id) }}#ogrenci">{{ p }}</a>
+                        </li>
+                    {% else %}
+                        <li class="page-item disabled"><span class="page-link">…</span></li>
+                    {% endif %}
+                {% endfor %}
+
+                <li class="page-item {% if not ogr_pagination.has_next %}disabled{% endif %}">
+                    <a class="page-link" href="{{ url_for('admin_panel', ogr_page=ogr_pagination.next_num, ogr_per_page=ogr_per_page, ogr_q=ogr_q, ogr_ekip_id=ogr_ekip_id) }}#ogrenci">Sonraki</a>
+                </li>
+            </ul>
+        </nav>
+        {% endif %}
     </div>
     
     <!-- Öğretmen Tab -->
@@ -416,7 +486,7 @@
                                         <input type="hidden" name="sil" value="1">
                                         <input type="hidden" name="ogretmen_id" value="{{ ogretmen.id }}">
                                         <button type="submit" class="btn btn-sm btn-outline-danger">
-                                            <i class="bi bi-trash"></i> Sil
+                                            <i class="bi bi-trash"></i> Sil <i class="bi bi-exclamation-octagon-fill text-danger" title="Bu işlem geri alınamaz ve sadece admin tarafından yapılabilir."></i>
                                         </button>
                                     </form>
                                 </td>
@@ -521,7 +591,7 @@
                                         <input type="hidden" name="sil" value="1">
                                         <input type="hidden" name="sunum_id" value="{{ sunum.id }}">
                                         <button type="submit" class="btn btn-sm btn-outline-danger">
-                                            <i class="bi bi-trash"></i> Sil
+                                            <i class="bi bi-trash"></i> Sil <i class="bi bi-exclamation-octagon-fill text-danger" title="Bu işlem geri alınamaz ve sadece admin tarafından yapılabilir."></i>
                                         </button>
                                     </form>
                                 </td>
@@ -539,6 +609,103 @@
             </div>
         </div>
     </div>
+
+    <!-- Değerlendirme Tab -->
+    <div class="tab-pane fade" id="degerlendirme" role="tabpanel">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h4 class="fw-bold mb-0">
+                <i class="bi bi-clipboard2-check text-danger"></i> Değerlendirme Yönetimi
+            </h4>
+        </div>
+
+        <div class="card">
+            <div class="card-header bg-light">
+                <h5 class="mb-0"><i class="bi bi-list-ul"></i> Değerlendirme Listesi
+                    {% if deg_pagination %}
+                        <span class="text-muted fw-normal">(Toplam: {{ deg_pagination.total }})</span>
+                    {% endif %}
+                </h5>
+            </div>
+            <div class="card-body p-0">
+                {% if degerlendirmeler_with_avg %}
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Sunum</th>
+                                <th>Değerlendiren</th>
+                                <th>Tip</th>
+                                <th>Ortalama</th>
+                                <th>İşlemler</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for row in degerlendirmeler_with_avg %}
+                            {% set d = row.degerlendirme %}
+                            <tr>
+                                <td>
+                                    <a href="{{ url_for('sunum_detay', sunum_id=d.sunum_id) }}" class="text-decoration-none">
+                                        <strong>{{ d.sunum.baslik }}</strong>
+                                    </a>
+                                    <div><small class="text-muted">{{ d.sunum.ekip.isim }}</small></div>
+                                </td>
+                                <td><strong>{{ d.degerlendiren_adi() }}</strong></td>
+                                <td>
+                                    {% if d.degerlendiren_tipi == 'ogrenci' %}
+                                        <span class="badge bg-primary">Öğrenci</span>
+                                    {% else %}
+                                        <span class="badge bg-warning text-dark">Öğretmen</span>
+                                    {% endif %}
+                                </td>
+                                <td>{{ "%.2f"|format(row.ortalama) }}</td>
+                                <td>
+                                    <form method="POST" action="{{ url_for('admin_degerlendirme') }}" style="display: inline;" onsubmit="return confirm('Bu değerlendirmeyi silmek istediğinize emin misiniz?');">
+                                        <input type="hidden" name="sil" value="1">
+                                        <input type="hidden" name="degerlendirme_id" value="{{ d.id }}">
+                                        <button type="submit" class="btn btn-sm btn-outline-danger">
+                                            <i class="bi bi-trash"></i> Sil <i class="bi bi-exclamation-octagon-fill text-danger" title="Bu işlem geri alınamaz ve sadece admin tarafından yapılabilir."></i>
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="text-center py-5">
+                    <i class="bi bi-inbox" style="font-size: 3rem; color: #ccc;"></i>
+                    <p class="text-muted mt-3">Henüz değerlendirme yok.</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        {% if deg_pagination and deg_pagination.pages > 1 %}
+        <nav aria-label="Değerlendirme sayfalama" class="mt-3">
+            <ul class="pagination justify-content-center">
+                <li class="page-item {% if not deg_pagination.has_prev %}disabled{% endif %}">
+                    <a class="page-link" href="{{ url_for('admin_panel', deg_page=deg_pagination.prev_num, deg_per_page=deg_per_page, ogr_q=ogr_q, ogr_ekip_id=ogr_ekip_id, ogr_page=ogr_pagination.page, ogr_per_page=ogr_per_page) }}#degerlendirme">Önceki</a>
+                </li>
+
+                {% for p in deg_pagination.iter_pages(left_edge=1, left_current=2, right_current=2, right_edge=1) %}
+                    {% if p %}
+                        <li class="page-item {% if p == deg_pagination.page %}active{% endif %}">
+                            <a class="page-link" href="{{ url_for('admin_panel', deg_page=p, deg_per_page=deg_per_page, ogr_q=ogr_q, ogr_ekip_id=ogr_ekip_id, ogr_page=ogr_pagination.page, ogr_per_page=ogr_per_page) }}#degerlendirme">{{ p }}</a>
+                        </li>
+                    {% else %}
+                        <li class="page-item disabled"><span class="page-link">…</span></li>
+                    {% endif %}
+                {% endfor %}
+
+                <li class="page-item {% if not deg_pagination.has_next %}disabled{% endif %}">
+                    <a class="page-link" href="{{ url_for('admin_panel', deg_page=deg_pagination.next_num, deg_per_page=deg_per_page, ogr_q=ogr_q, ogr_ekip_id=ogr_ekip_id, ogr_page=ogr_pagination.page, ogr_per_page=ogr_per_page) }}#degerlendirme">Sonraki</a>
+                </li>
+            </ul>
+        </nav>
+        {% endif %}
+    </div>
+
 </div>
 
 <!-- Düzenleme Modalleri -->

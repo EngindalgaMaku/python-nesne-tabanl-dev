@@ -1,183 +1,142 @@
-# Sunum Değerlendirme ve Notlandırma Sistemi
+# Sunum Değerlendirme Sistemi
 
-Python Nesne Yönelimli Programlama Final Projesi
+Bu proje, öğrencilerin ve öğretmenlerin, yapılan sunumları belirli kriterlere göre değerlendirmesini sağlayan ve bu değerlendirmelerden otomatik olarak final notları hesaplayan bir Flask web uygulamasıdır. Sistem, özellikle Nesne Yönelimli Programlama (OOP) prensipleri kullanılarak modüler ve yönetilebilir bir yapıda geliştirilmiştir.
 
-## Proje Özeti
+## Proje Akışı ve Sayfalar
 
-Bu proje, sınıf gruplarının sunumlarını değerlendirmek ve notlandırmak için geliştirilmiş bir web uygulamasıdır. Sistem, öğrencilerin ve öğretmenlerin sunumları belirli kriterlere göre puanlamasını ve final notlarının otomatik hesaplanmasını sağlar.
+### 1. Ana Sayfa (`/`)
+Kullanıcıların karşılandığı ana ekrandır. Bu sayfada:
+- Mevcut tüm sunumlar kartlar halinde listelenir.
+- Her sunumun final notu, değerlendirme sayısı ve temel bilgileri (ekip, tarih) görüntülenir.
+- Değerlendirmesi yapılmamış sunumlar için bir uyarı gösterilir.
+- Kullanıcılar, sunum detaylarını görmek veya yeni bir değerlendirme yapmak için ilgili butonları kullanabilir.
+- Admin kullanıcılar için "Yeni Sunum Ekle" butonu bulunur.
 
-## Özellikler
+### 2. Sunum Detay Sayfası (`/sunum/<id>`)
+Bir sunuma ait tüm detayların ve istatistiklerin bulunduğu sayfadır.
+- Sunumun final notu, öğretmen ve öğrenci not ortalamaları gibi genel istatistikler gösterilir.
+- Bu sunuma yapılmış tüm değerlendirmeler (hem öğretmen hem de öğrenci) listelenir.
+- Her değerlendirmenin kriter bazında puanları ve ağırlıklı ortalaması görüntülenir.
 
-- **Ekip Yönetimi**: 5-6 kişilik ekipler oluşturma ve yönetme
-- **Sunum Yönetimi**: Her ekip için sunum kayıtları
-- **Değerlendirme Sistemi**: 6 farklı kriterde puanlama
-  - Konu Hakimiyeti (%15)
-  - Anlatım (%15)
-  - Giyim (%5)
-  - Ekip Uyumu ve Görev Paylaşımı (%10)
-  - Görsellik (%35)
-  - Genel Görüş (%20)
-- **Not Hesaplama**: 
-  - Öğretmen notu: %60
-  - Öğrenci notlarının ortalaması: %40
-- **Dinamik Ayarlar**: Tüm ağırlıklar veritabanından dinamik olarak güncellenebilir
-- **Güvenlik Kuralı**: Ekipler kendi sunumlarına puan veremez
+### 3. Değerlendirme Yapma Sayfası (`/sunum/<id>/degerlendirme`)
+Yeni bir değerlendirme eklemek için kullanılan form sayfasıdır.
+- Değerlendirmeyi yapan kişinin tipi (Öğrenci/Öğretmen) seçilir.
+- Seçilen tipe göre ilgili öğrenciler veya öğretmenler listelenir.
+- Admin panelinden tanımlanmış 6 ana kriter için 0-100 arasında puanlama yapılır.
+- **Önemli Kural:** Bir ekibe üye olan öğrenciler, kendi ekiplerinin sunumunu değerlendiremez. Sistem bunu otomatik olarak engeller.
 
-## Teknolojiler
+### 4. Admin Paneli (`/admin`)
+Uygulamanın yönetim merkezidir. Sadece admin yetkisine sahip kullanıcılar erişebilir. Panel sekmelere ayrılmıştır:
+- **Ekipler:** Yeni ekipler oluşturulur, mevcut ekipler düzenlenir veya silinir.
+- **Öğrenciler:** Öğrenciler yönetilir ve ekiplere atanır. Arama ve filtreleme özellikleri mevcuttur.
+- **Öğretmenler:** Öğretmen kayıtları yönetilir.
+- **Sunumlar:** Yeni sunumlar oluşturulur ve yönetilir.
+- **Değerlendirmeler:** Yapılan tüm değerlendirmeler listelenir ve admin tarafından silinebilir.
 
-- **Dil**: Python 3.x
-- **Framework**: Flask 3.x
-- **Veritabanı**: SQLite (geliştirme için)
-- **Frontend**: Bootstrap 5, Bootstrap Icons
-- **Mimari**: Nesne Yönelimli Programlama (OOP)
+### 5. Ayarlar Sayfası (`/ayarlar`)
+Sistemin hesaplama mantığını yöneten kritik sayfadır. Yalnızca admin erişimine açıktır.
+- **Kriter Ağırlıkları:** 6 ana değerlendirme kriterinin (Konu Hakimiyeti, Görsellik vb.) final notuna etkisini belirleyen yüzdelik ağırlıklar ayarlanır.
+- **Kriter Başlıkları:** Değerlendirme formunda görünen kriter etiketleri (örn: "Görsellik" yerine "Sunum Tasarımı") değiştirilebilir.
+- **Final Not Hesaplama Ağırlıkları:** Öğretmen ve öğrenci değerlendirmelerinin final notuna ne kadar etki edeceği buradan ayarlanır (örn: %60 Öğretmen, %40 Öğrenci).
 
-## Kurulum
+---
 
-1. Projeyi klonlayın veya indirin:
+## Kurulum ve Çalıştırma
+
+Projeyi yerel makinenizde çalıştırmak için aşağıdaki adımları izleyin.
+
+### 1. Projeyi Klonlama
 ```bash
-cd python_nesne
+git clone https://github.com/EngindalgaMaku/python-nesne-tabanl-dev.git
+cd python-nesne-tabanl-dev
 ```
 
-2. Gerekli paketleri yükleyin:
+### 2. Sanal Ortam (Virtual Environment) Oluşturma
+```bash
+# Windows
+python -m venv venv
+venv\Scripts\activate
+
+# macOS / Linux
+python3 -m venv venv
+source venv/bin/activate
+```
+
+### 3. Gerekli Paketleri Yükleme
 ```bash
 pip install -r requirements.txt
 ```
 
-3. Sunucuyu başlatın:
+### 4. Veritabanını Oluşturma
+Uygulama ilk kez çalıştırıldığında `sunum_degerlendirme.db` adında bir SQLite veritabanı dosyası otomatik olarak oluşturulur ve gerekli tablolar kurulur. Ayrıca, varsayılan bir admin kullanıcısı da yaratılır.
+
+### 5. Örnek Veri Ekleme (İsteğe Bağlı)
+Uygulamayı test etmek için örnek ekipler ve öğrenciler ekleyebilirsiniz:
 ```bash
+flask seed-sample-data
+```
+
+### 6. Uygulamayı Başlatma
+```bash
+flask run
+# veya
 python app.py
 ```
+Uygulama varsayılan olarak `http://127.0.0.1:5000` adresinde çalışacaktır.
 
-Alternatif (Windows):
-```bash
-run_flask.bat
-```
+### Varsayılan Admin Bilgileri
+- **Kullanıcı Adı:** `admin`
+- **Şifre:** `admin123`
 
-4. Tarayıcınızda açın:
-```
-http://127.0.0.1:5000
-```
+---
 
-Varsayılan admin kullanıcı otomatik oluşturulur:
-- kullanıcı adı: `admin`
-- şifre: `admin123`
+## Kod Mimarisi ve Sınıf Yapıları
 
-## Kullanım
+Proje, `sunum_app` adında bir paket içerisinde modüler bir yapıda organize edilmiştir. Bu yapı, kodun okunabilirliğini ve bakımını kolaylaştırır.
 
-### Admin Paneli
-
-Admin paneline erişmek için:
-```
-http://127.0.0.1:5000/admin
-```
-
-Admin panelinden:
-- Ekipler oluşturabilir ve düzenleyebilirsiniz
-- Öğrenciler ekleyebilir ve ekiplere atayabilirsiniz
-- Öğretmenler ekleyebilirsiniz
-- Sunumlar oluşturabilirsiniz
-
-### Web Arayüzü
-
-Ana sayfadan:
-- Tüm sunumları görüntüleyebilirsiniz
-- Sunum detaylarını inceleyebilirsiniz
-- Değerlendirme yapabilirsiniz
-- Ayarları düzenleyebilirsiniz
-
-### Değerlendirme Yapma
-
-1. Ana sayfadan bir sunum seçin
-2. "Değerlendir" butonuna tıklayın
-3. Değerlendiren tipini seçin (Öğrenci veya Öğretmen)
-4. İlgili kişiyi seçin
-5. Her kriter için 0-100 arası puan verin
-6. İsteğe bağlı yorum ekleyin
-7. Kaydedin
-
-**Önemli**: Ekipler kendi sunumlarına puan veremez. Sistem bunu otomatik olarak kontrol eder.
-
-### Ayarları Düzenleme
-
-Ayarlar sayfasından:
-- Değerlendirme kriterleri ağırlıklarını değiştirebilirsiniz
-- Final not hesaplama ağırlıklarını güncelleyebilirsiniz
-- Tüm ağırlıkların toplamı 100 olmalıdır
-
-## Veritabanı Tasarımı
-
-### Modeller (OOP Sınıfları)
-
-1. **Ayarlar**: Sistem ayarları ve ağırlıklar
-2. **Ekip**: Sunum yapan ekipler
-3. **Ogrenci**: Öğrenci bilgileri
-4. **Ogretmen**: Öğretmen bilgileri
-5. **Sunum**: Sunum kayıtları
-6. **Degerlendirme**: Yapılan değerlendirmeler
-
-### İlişkiler
-
-- Bir Ekip birden fazla Ogrenci içerebilir
-- Bir Ekip birden fazla Sunum yapabilir
-- Bir Sunum birden fazla Degerlendirme alabilir
-- Bir Degerlendirme bir Ogrenci veya Ogretmen tarafından yapılabilir
-
-## Fonksiyonel Programlama Kullanımı
-
-Bu proje ağırlıklı olarak **OOP mimari** ile düzenlenmiştir:
-
-- Modeller: `sunum_app/models.py`
-- Servis katmanı: `sunum_app/services/not_hesaplama.py`
-- Controller (class-based views): `sunum_app/controllers.py`
-- Route kaydı: `sunum_app/routes.py`
-
-## Sınıf Yapıları
-
-### NotHesaplamaServisi
-
-Not hesaplama işlemlerini yöneten servis sınıfı.
-
-**Metodlar:**
-- `hesapla_agirlikli_ortalama()`: Bir değerlendirmenin ağırlıklı ortalamasını hesaplar
-- `hesapla_final_notu()`: Final notunu hesaplar
-- `sunum_istatistikleri()`: Sunum için detaylı istatistikler döndürür
-
-## Proje Yapısı
-
+### Proje Dosya Yapısı
 ```
 python_nesne/
-├── requirements.txt
-├── README.md
-├── app.py
 ├── sunum_app/
-│   ├── __init__.py
-│   ├── extensions.py
-│   ├── models.py
-│   ├── controllers.py
-│   ├── routes.py
+│   ├── static/              # CSS, JS, resimler ve favicon gibi statik dosyalar
+│   ├── templates/           # HTML şablonları
+│   ├── __init__.py          # Flask uygulama fabrikası (create_app)
+│   ├── controllers.py       # Rota mantığını içeren Class-Based View'lar
+│   ├── models.py            # SQLAlchemy veritabanı modelleri (sınıflar)
+│   ├── routes.py            # URL rotalarını controllera bağlayan dosya
 │   └── services/
-│       ├── __init__.py
-│       └── not_hesaplama.py
-├── templates/
-└── static/
+│       └── not_hesaplama.py # Not hesaplama mantığını içeren servis sınıfı
+├── app.py                   # Uygulama giriş noktası
+├── requirements.txt         # Proje bağımlılıkları
+└── README.md                # Bu dosya
 ```
 
-## Rapor İçeriği
+### Ana Sınıflar ve Görevleri
 
-Bu proje için hazırlanan rapor şunları içermelidir:
+#### `sunum_app/models.py`
+Bu dosya, veritabanı tablolarını temsil eden tüm SQLAlchemy sınıflarını içerir. Her sınıf, bir tabloya karşılık gelir ve Nesne Yönelimli Programlama'nın temelini oluşturur.
 
-1. **Kullanılan Teknolojiler**: Flask, Python, Bootstrap
-2. **Veritabanı Tasarımı**: Modeller ve ilişkiler
-3. **Sınıf Yapıları**: OOP prensipleri ve UML diyagramı (opsiyonel)
-4. **Sistem Özellikleri**: Değerlendirme kriterleri, not hesaplama
+- **`User(db.Model, UserMixin)`**: Kullanıcıları (admin) temsil eder. Giriş işlemleri için `Flask-Login` ile entegredir.
+- **`Ekip(db.Model)`**: Sunum yapan öğrenci ekiplerini temsil eder. Her ekibin bir ismi, açıklaması ve birden çok öğrencisi olabilir.
+- **`Ogrenci(db.Model)`**: Öğrencileri temsil eder. Her öğrencinin adı, soyadı, numarası ve bağlı olduğu bir ekibi vardır.
+- **`Ogretmen(db.Model)`**: Değerlendirme yapabilen öğretmenleri temsil eder.
+- **`Sunum(db.Model)`**: Ekipler tarafından yapılan sunumları temsil eder. Bir sunumun başlığı, tarihi ve hangi ekibe ait olduğu bilgisi tutulur.
+- **`Degerlendirme(db.Model)`**: Bir sunuma yapılmış tek bir değerlendirmeyi temsil eder. Kimin yaptığı (öğrenci/öğretmen), hangi sunuma yapıldığı ve 6 kriter için verilen puanları içerir.
+- **`Ayarlar(db.Model)`**: Sistem genelindeki tüm dinamik ayarları (kriter ve not ağırlıkları, etiketler) tutan sınıftır. Bu tablo genellikle tek bir satır içerir.
 
-## Lisans
+#### `sunum_app/services/not_hesaplama.py`
+Bu dosya, not hesaplamayla ilgili karmaşık iş mantığını modellerden ayırarak ayrı bir servis katmanında toplar. Bu, "Separation of Concerns" (Sorumlulukların Ayrılması) ilkesine güzel bir örnektir.
 
-Bu proje eğitim amaçlı geliştirilmiştir.
+- **`NotHesaplamaServisi`**:
+  - **`__init__(self, sunum_id)`**: Servis, belirli bir `sunum_id`'si ile başlatılır.
+  - **`hesapla_agirlikli_ortalama(self, degerlendirme)`**: Tek bir değerlendirmenin, `Ayarlar` tablosundaki ağırlıklara göre not ortalamasını hesaplar.
+  - **`hesapla_final_notu(self)`**: Bir sunum için yapılmış tüm değerlendirmeleri alır, öğretmen ve öğrenci notlarını ayırır, ortalamalarını alır ve `Ayarlar` tablosundaki final notu ağırlıklarına göre nihai notu hesaplar.
+  - **`sunum_istatistikleri(self)`**: Sunum detay sayfasında gösterilen tüm zengin veriyi (final notu, ortalamalar, değerlendirme listesi vb.) üreten ana metottur.
 
-## İletişim
+#### `sunum_app/controllers.py`
+Bu dosya, Flask'in Class-Based View'larını kullanarak her bir rota için iş mantığını içerir. Her view sınıfı, belirli bir URL'ye gelen `GET`, `POST` gibi HTTP isteklerini yönetir.
 
-Sorularınız için proje sahibi ile iletişime geçebilirsiniz.
-
-
-
+- **`IndexView`**: Ana sayfayı (`/`) render eder. Tüm sunumları ve istatistiklerini `NotHesaplamaServisi`'ni kullanarak hazırlar.
+- **`AdminPanelView`**: Admin panelinin (`/admin`) ana görünümüdür. Tüm sekmeler için gerekli verileri (ekip listesi, öğrenci listesi vb.) toplar ve şablona gönderir.
+- **`DegerlendirmeYapView`**: Değerlendirme formunu (`/sunum/<id>/degerlendirme`) gösterir ve `POST` isteği ile gelen yeni değerlendirmeleri veritabanına kaydeder.
+- **`AyarlarView`**: Ayarlar sayfasını yönetir. Mevcut ayarları gösterir ve `POST` isteği ile gelen güncellemeleri veritabanına kaydeder.
